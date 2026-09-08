@@ -1,7 +1,7 @@
 import HomeHeader from "@/components/HomeHeader";
 import MacroGrid from "@/components/MacroGrid";
 import RecentMeals from "@/components/RecentMeals";
-import { deleteAllMeals, deleteMeal, getMeals, Meal } from "@/storage/meals";
+import { deleteMeal, getMealsForDay, Meal } from "@/storage/meals";
 import { DEFAULT_TARGETS, getTargets, type Targets } from "@/storage/targets";
 import { globalStyles } from "@/styles/global";
 import { useFocusEffect } from "expo-router";
@@ -14,7 +14,7 @@ export default function HomeScreen() {
 
   const fetchHomeData = async () => {
     const [fetchedMeals, fetchedTargets] = await Promise.all([
-      getMeals(),
+      getMealsForDay(),
       getTargets(),
     ]);
     setMeals(fetchedMeals);
@@ -23,11 +23,6 @@ export default function HomeScreen() {
 
   const handleDeleteMeal = async (id: string) => {
     await deleteMeal(id);
-    await fetchHomeData();
-  };
-
-  const handleClearAll = async () => {
-    await deleteAllMeals();
     await fetchHomeData();
   };
 
@@ -40,7 +35,7 @@ export default function HomeScreen() {
   return (
     <ScrollView style={globalStyles.container}>
       <Text style={globalStyles.title}>MacroZone</Text>
-      <HomeHeader hasMeals={meals.length > 0} onClearAll={handleClearAll} />
+      <HomeHeader />
       <MacroGrid meals={meals} targets={targets} />
       <RecentMeals meals={meals} onDeleteMeal={handleDeleteMeal} />
     </ScrollView>

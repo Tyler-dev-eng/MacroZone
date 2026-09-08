@@ -1,9 +1,17 @@
 import MealItem from "@/components/MealItem";
 import { deleteAllMeals, deleteMeal, getMeals, Meal } from "@/storage/meals";
 import { colors, globalStyles } from "@/styles/global";
+import { formatHistoryDay } from "@/utils/dates";
 import { useFocusEffect, router } from "expo-router";
 import { useCallback, useState } from "react";
-import { Alert, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import {
+  Alert,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 export default function MealsScreen() {
   const [meals, setMeals] = useState<Meal[]>([]);
@@ -24,15 +32,19 @@ export default function MealsScreen() {
   };
 
   const confirmClear = () => {
-    Alert.alert("Clear all meals?", "This can't be undone.", [
-      { text: "Cancel", style: "cancel" },
-      { text: "Clear all", style: "destructive", onPress: handleClearAll },
-    ]);
+    Alert.alert(
+      "Delete all meal history?",
+      "This removes every logged meal, including past days. This can't be undone.",
+      [
+        { text: "Cancel", style: "cancel" },
+        { text: "Delete all", style: "destructive", onPress: handleClearAll },
+      ],
+    );
   };
 
   useFocusEffect(
     useCallback(() => {
-      loadMeals();
+      void loadMeals();
     }, []),
   );
 
@@ -42,34 +54,69 @@ export default function MealsScreen() {
         <Text style={globalStyles.title}>All Meals</Text>
         {meals.length > 0 ? (
           <TouchableOpacity onPress={confirmClear} hitSlop={8}>
-            <Text style={{ color: colors.alert, fontSize: 14 }}>Clear all</Text>
+            <Text style={styles.clear}>Delete all</Text>
           </TouchableOpacity>
         ) : null}
       </View>
-      <View style={{ marginTop: 30 }}>
+      <View style={styles.list}>
         {meals.length === 0 ? (
           <Text style={globalStyles.empty}>No meals logged yet.</Text>
         ) : (
-          meals.map((meal) => (
-            <MealItem
-              key={meal.id}
-              name={meal.name}
-              calories={meal.calories}
-              protein={meal.protein}
-              carbs={meal.carbs}
-              fat={meal.fat}
-              imageUri={meal.imageUri}
-              onPress={() =>
-                router.push({
-                  pathname: "/meal/[id]",
-                  params: { id: meal.id },
-                })
-              }
-              onDelete={() => handleDeleteMeal(meal.id)}
-            />
-          ))
+          meals.map((meal, index) => {
+            const dayLabel = formatHistoryDay(meal.createdAt);
+            const previousLabel =
+              index > 0 ? formatHistoryDay(meals[index - 1].createdAt) : null;
+            const showDay = dayLabel !== previousLabel;
+
+            return (
+              <View key={meal.id}>
+                {showDay ? (
+                  <Text
+                    style={[styles.day, index === 0 ? styles.firstDay : null]}
+                  >
+                    {dayLabel}
+                  </Text>
+                ) : null}
+                <MealItem
+                  name={meal.name}
+                  calories={meal.calories}
+                  protein={meal.protein}
+                  carbs={meal.carbs}
+                  fat={meal.fat}
+                  imageUri={meal.imageUri}
+                  onPress={() =>
+                    router.push({
+                      pathname: "/meal/[id]",
+                      params: { id: meal.id },
+                    })
+                  }
+                  onDelete={() => handleDeleteMeal(meal.id)}
+                />
+              </View>
+            );
+          })
         )}
       </View>
     </ScrollView>
   );
 }
+
+const styles = StyleSheet.create({
+  clear: {
+    color: colors.alert,
+    fontSize: 14,
+  },
+  list: {
+    marginTop: 30,
+  },
+  day: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: colors.textSecondary,
+    marginTop: 18,
+    marginBottom: 10,
+  },
+  firstDay: {
+    marginTop: 0,
+  },
+});

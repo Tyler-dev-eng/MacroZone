@@ -7,7 +7,8 @@ import {
   deleteMealImageFile,
   persistMealImage,
 } from "@/storage/mealImages";
-import { desc, eq } from "drizzle-orm";
+import { startOfLocalDay, startOfNextLocalDay } from "@/utils/dates";
+import { desc, eq, and, gte, lt } from "drizzle-orm";
 
 export type { Meal, NewMeal };
 
@@ -20,6 +21,18 @@ export const getMeal = async (id: string): Promise<Meal | undefined> => {
 // SELECT * FROM meals ORDER BY created_at DESC
 export const getMeals = async (): Promise<Meal[]> => {
   return db.select().from(meals).orderBy(desc(meals.createdAt));
+};
+
+/** Meals logged on the given local calendar day (defaults to today). */
+export const getMealsForDay = async (date = new Date()): Promise<Meal[]> => {
+  const start = startOfLocalDay(date).toISOString();
+  const end = startOfNextLocalDay(date).toISOString();
+
+  return db
+    .select()
+    .from(meals)
+    .where(and(gte(meals.createdAt, start), lt(meals.createdAt, end)))
+    .orderBy(desc(meals.createdAt));
 };
 
 // INSERT a row. The form only sends macros (NewMeal); we generate id + createdAt here.

@@ -13,30 +13,28 @@ export default function RecentMeals({
 }) {
   return (
     <View style={{ marginTop: 30 }}>
-      <Text style={globalStyles.sectionTitle}>Recent Meals</Text>
+      <Text style={globalStyles.sectionTitle}>{"Today's meals"}</Text>
       {meals.length === 0 ? (
-        <Text style={globalStyles.empty}>No meals yet</Text>
+        <Text style={globalStyles.empty}>No meals logged today.</Text>
       ) : (
-        meals
-          .slice(0, 5) // newest 5; getMeals() already orders by createdAt DESC
-          .map((meal) => (
-            <MealItem
-              key={meal.id}
-              name={meal.name}
-              calories={meal.calories}
-              protein={meal.protein}
-              carbs={meal.carbs}
-              fat={meal.fat}
-              imageUri={meal.imageUri}
-              onPress={() =>
-                router.push({
-                  pathname: "/meal/[id]",
-                  params: { id: meal.id },
-                })
-              }
-              onDelete={() => onDeleteMeal(meal.id)}
-            />
-          ))
+        meals.map((meal) => (
+          <MealItem
+            key={meal.id}
+            name={meal.name}
+            calories={meal.calories}
+            protein={meal.protein}
+            carbs={meal.carbs}
+            fat={meal.fat}
+            imageUri={meal.imageUri}
+            onPress={() =>
+              router.push({
+                pathname: "/meal/[id]",
+                params: { id: meal.id },
+              })
+            }
+            onDelete={() => onDeleteMeal(meal.id)}
+          />
+        ))
       )}
     </View>
   );
