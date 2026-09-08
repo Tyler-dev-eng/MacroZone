@@ -1,0 +1,7 @@
+/.expo
+node_modules
+dist
+web-build
+ios
+android
+package-lock.json
