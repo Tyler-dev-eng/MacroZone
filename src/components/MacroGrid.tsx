@@ -23,26 +23,29 @@ export default function MacroGrid({ meals, targets }: MacroGridProps) {
     <View style={styles.grid}>
       <MacroCard
         label="Calories"
-        value={`${totals.calories}`}
-        goal={targets.calories.toLocaleString("en-US")}
+        current={totals.calories}
+        target={targets.calories}
         color="#ff6b6b"
       />
       <MacroCard
         label="Protein"
-        value={`${totals.protein}g`}
-        goal={`${targets.protein}g`}
+        current={totals.protein}
+        target={targets.protein}
+        unit="g"
         color="#4ecdc4"
       />
       <MacroCard
         label="Carbs"
-        value={`${totals.carbs}g`}
-        goal={`${targets.carbs}g`}
+        current={totals.carbs}
+        target={targets.carbs}
+        unit="g"
         color="#ffd93d"
       />
       <MacroCard
         label="Fat"
-        value={`${totals.fat}g`}
-        goal={`${targets.fat}g`}
+        current={totals.fat}
+        target={targets.fat}
+        unit="g"
         color="#6bcb77"
       />
     </View>
