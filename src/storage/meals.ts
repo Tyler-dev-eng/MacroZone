@@ -2,7 +2,7 @@
 // they should not talk to Drizzle or SQLite directly.
 import { db } from "@/db";
 import { meals, type Meal, type NewMeal } from "@/db/schema";
-import { desc } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
 
 // Re-export schema types so screens can import from this file instead of @/db/schema.
 export type { Meal, NewMeal };
@@ -22,4 +22,9 @@ export const addMeal = async (meal: NewMeal): Promise<Meal> => {
 
   await db.insert(meals).values(newMeal);
   return newMeal;
+};
+
+// DELETE FROM meals WHERE id = ?
+export const deleteMeal = async (id: string): Promise<void> => {
+  await db.delete(meals).where(eq(meals.id, id));
 };

@@ -1,4 +1,6 @@
-import { StyleSheet, Text, View } from "react-native";
+import { colors } from "@/styles/global";
+import { Ionicons } from "@expo/vector-icons";
+import { Alert, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 type MealItemProps = {
   name: string;
@@ -6,6 +8,7 @@ type MealItemProps = {
   protein: number;
   carbs: number;
   fat: number;
+  onDelete: () => void;
 };
 
 export default function MealItem({
@@ -14,13 +17,26 @@ export default function MealItem({
   protein,
   carbs,
   fat,
+  onDelete,
 }: MealItemProps) {
+  const confirmDelete = () => {
+    Alert.alert("Delete meal?", `"${name}" will be removed.`, [
+      { text: "Cancel", style: "cancel" },
+      { text: "Delete", style: "destructive", onPress: onDelete },
+    ]);
+  };
+
   return (
     <View style={styles.container}>
-      <Text style={styles.name}>{name}</Text>
-      <Text style={styles.macros}>
-        {calories} cal • {protein}g P • {carbs}g C • {fat}g F
-      </Text>
+      <View style={styles.details}>
+        <Text style={styles.name}>{name}</Text>
+        <Text style={styles.macros}>
+          {calories} cal • {protein}g P • {carbs}g C • {fat}g F
+        </Text>
+      </View>
+      <TouchableOpacity onPress={confirmDelete} hitSlop={8}>
+        <Ionicons name="trash-outline" size={20} color={colors.alert} />
+      </TouchableOpacity>
     </View>
   );
 }
@@ -31,6 +47,12 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 16,
     marginBottom: 10,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
+  details: {
+    flex: 1,
   },
   name: {
     fontSize: 16,
