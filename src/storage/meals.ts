@@ -1,0 +1,25 @@
+// Data-access layer for meals (Room's @Dao). Screens call these functions;
+// they should not talk to Drizzle or SQLite directly.
+import { db } from "@/db";
+import { meals, type Meal, type NewMeal } from "@/db/schema";
+import { desc } from "drizzle-orm";
+
+// Re-export schema types so screens can import from this file instead of @/db/schema.
+export type { Meal, NewMeal };
+
+// SELECT * FROM meals ORDER BY created_at DESC
+export const getMeals = async (): Promise<Meal[]> => {
+  return db.select().from(meals).orderBy(desc(meals.createdAt));
+};
+
+// INSERT a row. The form only sends macros (NewMeal); we generate id + createdAt here.
+export const addMeal = async (meal: NewMeal): Promise<Meal> => {
+  const newMeal: Meal = {
+    ...meal,
+    id: Date.now().toString(),
+    createdAt: new Date().toISOString(),
+  };
+
+  await db.insert(meals).values(newMeal);
+  return newMeal;
+};

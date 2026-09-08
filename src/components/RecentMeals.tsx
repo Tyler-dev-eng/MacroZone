@@ -1,32 +1,40 @@
+import MealItem from "@/components/MealItem";
+import { getMeals, type Meal } from "@/storage/meals";
 import { globalStyles } from "@/styles/global";
+import { useFocusEffect } from "expo-router";
+import { useCallback, useState } from "react";
 import { Text, View } from "react-native";
-import MealItem from "./MealItem";
 
 export default function RecentMeals() {
+  const [meals, setMeals] = useState<Meal[]>([]);
+
+  // Refetch whenever this screen is focused (e.g. after adding a meal on another tab).
+  // useEffect would only run once on mount, so new rows wouldn't show until reload.
+  useFocusEffect(
+    useCallback(() => {
+      void getMeals().then(setMeals);
+    }, []),
+  );
+
   return (
     <View style={{ marginTop: 30 }}>
       <Text style={globalStyles.sectionTitle}>Recent Meals</Text>
-      <MealItem
-        name="Chicken & Rice"
-        calories={540}
-        protein={45}
-        carbs={50}
-        fat={12}
-      />
-      <MealItem
-        name="Protein Shake"
-        calories={280}
-        protein={30}
-        carbs={20}
-        fat={8}
-      />
-      <MealItem
-        name="Salmon Salad"
-        calories={430}
-        protein={35}
-        carbs={10}
-        fat={25}
-      />
+      {meals.length === 0 ? (
+        <Text style={globalStyles.empty}>No meals yet</Text>
+      ) : (
+        meals
+          .slice(0, 5) // newest 5; getMeals() already orders by createdAt DESC
+          .map((meal) => (
+            <MealItem
+              key={meal.id}
+              name={meal.name}
+              calories={meal.calories}
+              protein={meal.protein}
+              carbs={meal.carbs}
+              fat={meal.fat}
+            />
+          ))
+      )}
     </View>
   );
 }
