@@ -8,6 +8,13 @@
       "when": 1788872915441,
       "tag": "0000_premium_lionheart",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1788878722455,
+      "tag": "0001_eminent_swarm",
+      "breakpoints": true
     }
   ]
 }

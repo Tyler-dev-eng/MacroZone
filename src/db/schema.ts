@@ -18,3 +18,15 @@ export const meals = sqliteTable("meals", {
 export type Meal = typeof meals.$inferSelect;
 // What the form sends — id and createdAt are added in addMeal().
 export type NewMeal = Omit<Meal, "id" | "createdAt">;
+
+// Single-row table for daily macro targets (always id = "default").
+export const targets = sqliteTable("targets", {
+  id: text("id").primaryKey(),
+  calories: integer("calories").notNull(),
+  protein: real("protein").notNull(),
+  carbs: real("carbs").notNull(),
+  fat: real("fat").notNull(),
+});
+
+export type Targets = typeof targets.$inferSelect;
+export type NewTargets = Omit<Targets, "id">;
