@@ -10,6 +10,8 @@ export const meals = sqliteTable("meals", {
   protein: real("protein").notNull(),
   carbs: real("carbs").notNull(),
   fat: real("fat").notNull(),
+  // Local file URI for the optional meal photo.
+  imageUri: text("image_uri"),
   // JS field createdAt maps to the created_at column in SQLite.
   createdAt: text("created_at").notNull(),
 });

@@ -1,0 +1,1 @@
+ALTER TABLE `meals` ADD `image_uri` text;

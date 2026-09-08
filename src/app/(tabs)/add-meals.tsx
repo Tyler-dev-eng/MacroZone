@@ -1,9 +1,11 @@
+import MealPhotoPicker from "@/components/MealPhotoPicker";
 import { addMeal } from "@/storage/meals";
 import { colors, globalStyles } from "@/styles/global";
 import { router } from "expo-router";
 import { useState } from "react";
 import {
   Alert,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -22,6 +24,7 @@ export default function AddMealScreen() {
   const [protein, setProtein] = useState("");
   const [carbs, setCarbs] = useState("");
   const [fat, setFat] = useState("");
+  const [imageUri, setImageUri] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
   const handleAddMeal = async () => {
@@ -43,6 +46,7 @@ export default function AddMealScreen() {
         protein: toNumber(protein) ?? 0,
         carbs: toNumber(carbs) ?? 0,
         fat: toNumber(fat) ?? 0,
+        imageUri,
       });
     } catch {
       Alert.alert("Couldn't save", "Something went wrong. Try again.");
@@ -57,14 +61,21 @@ export default function AddMealScreen() {
     setProtein("");
     setCarbs("");
     setFat("");
+    setImageUri(null);
 
     // Switch to the Home tab (push would stack another Home on this tab).
     router.navigate("/");
   };
 
   return (
-    <View style={globalStyles.container}>
+    <ScrollView
+      style={globalStyles.container}
+      keyboardShouldPersistTaps="handled"
+      contentContainerStyle={{ paddingBottom: 40 }}
+    >
       <Text style={globalStyles.title}>Add Meal</Text>
+
+      <MealPhotoPicker uri={imageUri} onChange={setImageUri} />
 
       <TextInput
         style={styles.input}
@@ -119,7 +130,7 @@ export default function AddMealScreen() {
           {saving ? "Adding..." : "Add Meal"}
         </Text>
       </TouchableOpacity>
-    </View>
+    </ScrollView>
   );
 }
 

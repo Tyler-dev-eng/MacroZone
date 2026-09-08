@@ -27,6 +27,7 @@ export default function RecentMeals({
               protein={meal.protein}
               carbs={meal.carbs}
               fat={meal.fat}
+              imageUri={meal.imageUri}
               onPress={() =>
                 router.push({
                   pathname: "/meal/[id]",

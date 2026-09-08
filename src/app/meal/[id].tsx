@@ -1,3 +1,4 @@
+import MealPhotoPicker from "@/components/MealPhotoPicker";
 import { getMeal, updateMeal, type Meal } from "@/storage/meals";
 import { colors, globalStyles } from "@/styles/global";
 import { Ionicons } from "@expo/vector-icons";
@@ -5,6 +6,7 @@ import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
 import {
   Alert,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -27,6 +29,7 @@ export default function MealDetailsScreen() {
   const [protein, setProtein] = useState("");
   const [carbs, setCarbs] = useState("");
   const [fat, setFat] = useState("");
+  const [imageUri, setImageUri] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
@@ -41,6 +44,7 @@ export default function MealDetailsScreen() {
         setProtein(String(row.protein));
         setCarbs(String(row.carbs));
         setFat(String(row.fat));
+        setImageUri(row.imageUri);
       }
       setLoading(false);
     });
@@ -66,6 +70,7 @@ export default function MealDetailsScreen() {
         protein: toNumber(protein) ?? 0,
         carbs: toNumber(carbs) ?? 0,
         fat: toNumber(fat) ?? 0,
+        imageUri,
       });
       router.back();
     } catch {
@@ -104,7 +109,11 @@ export default function MealDetailsScreen() {
   });
 
   return (
-    <View style={globalStyles.container}>
+    <ScrollView
+      style={globalStyles.container}
+      keyboardShouldPersistTaps="handled"
+      contentContainerStyle={{ paddingBottom: 40 }}
+    >
       <TouchableOpacity style={styles.back} onPress={() => router.back()}>
         <Ionicons name="chevron-back" size={22} color={colors.primary} />
         <Text style={styles.backText}>Back</Text>
@@ -112,6 +121,8 @@ export default function MealDetailsScreen() {
 
       <Text style={globalStyles.title}>Meal details</Text>
       <Text style={styles.meta}>Logged {loggedAt}</Text>
+
+      <MealPhotoPicker uri={imageUri} onChange={setImageUri} />
 
       <TextInput
         style={styles.input}
@@ -166,7 +177,7 @@ export default function MealDetailsScreen() {
           {saving ? "Saving..." : "Save changes"}
         </Text>
       </TouchableOpacity>
-    </View>
+    </ScrollView>
   );
 }
 

@@ -2,6 +2,11 @@
 // they should not talk to Drizzle or SQLite directly.
 import { db } from "@/db";
 import { meals, type Meal, type NewMeal } from "@/db/schema";
+import {
+  deleteAllMealImageFiles,
+  deleteMealImageFile,
+  persistMealImage,
+} from "@/storage/mealImages";
 import { desc, eq } from "drizzle-orm";
 
 export type { Meal, NewMeal };
@@ -19,10 +24,14 @@ export const getMeals = async (): Promise<Meal[]> => {
 
 // INSERT a row. The form only sends macros (NewMeal); we generate id + createdAt here.
 export const addMeal = async (meal: NewMeal): Promise<Meal> => {
+  const id = Date.now().toString();
+  const imageUri = meal.imageUri ? persistMealImage(meal.imageUri, id) : null;
+
   const newMeal: Meal = {
     ...meal,
-    id: Date.now().toString(),
+    id,
     createdAt: new Date().toISOString(),
+    imageUri,
   };
 
   await db.insert(meals).values(newMeal);
@@ -31,15 +40,31 @@ export const addMeal = async (meal: NewMeal): Promise<Meal> => {
 
 // DELETE FROM meals WHERE id = ?
 export const deleteMeal = async (id: string): Promise<void> => {
+  const meal = await getMeal(id);
+  deleteMealImageFile(meal?.imageUri);
   await db.delete(meals).where(eq(meals.id, id));
 };
 
 // DELETE ALL meals
 export const deleteAllMeals = async (): Promise<void> => {
+  deleteAllMealImageFiles();
   await db.delete(meals);
 };
 
 // UPDATE A MEAL
 export const updateMeal = async (meal: Meal): Promise<void> => {
-  await db.update(meals).set(meal).where(eq(meals.id, meal.id));
+  const existing = await getMeal(meal.id);
+  let imageUri = meal.imageUri ?? null;
+
+  if (imageUri && imageUri !== existing?.imageUri) {
+    deleteMealImageFile(existing?.imageUri);
+    imageUri = persistMealImage(imageUri, meal.id);
+  } else if (!imageUri && existing?.imageUri) {
+    deleteMealImageFile(existing.imageUri);
+  }
+
+  await db
+    .update(meals)
+    .set({ ...meal, imageUri })
+    .where(eq(meals.id, meal.id));
 };

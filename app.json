@@ -33,7 +33,15 @@
           "imageWidth": 76
         }
       ],
-      "expo-sqlite"
+      "expo-sqlite",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "MacroZone uses your photos so you can attach a picture to a meal.",
+          "cameraPermission": "MacroZone uses your camera so you can photograph a meal.",
+          "microphonePermission": false
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,

@@ -1,5 +1,6 @@
 import { colors } from "@/styles/global";
 import { Ionicons } from "@expo/vector-icons";
+import { Image } from "expo-image";
 import { Alert, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 type MealItemProps = {
@@ -8,6 +9,7 @@ type MealItemProps = {
   protein: number;
   carbs: number;
   fat: number;
+  imageUri?: string | null;
   onPress: () => void;
   onDelete: () => void;
 };
@@ -18,6 +20,7 @@ export default function MealItem({
   protein,
   carbs,
   fat,
+  imageUri,
   onPress,
   onDelete,
 }: MealItemProps) {
@@ -31,10 +34,20 @@ export default function MealItem({
   return (
     <View style={styles.container}>
       <TouchableOpacity style={styles.details} onPress={onPress}>
-        <Text style={styles.name}>{name}</Text>
-        <Text style={styles.macros}>
-          {calories} cal • {protein}g P • {carbs}g C • {fat}g F
-        </Text>
+        {imageUri ? (
+          <Image
+            source={{ uri: imageUri }}
+            style={styles.thumb}
+            contentFit="cover"
+            accessibilityLabel={`${name} photo`}
+          />
+        ) : null}
+        <View style={styles.text}>
+          <Text style={styles.name}>{name}</Text>
+          <Text style={styles.macros}>
+            {calories} cal • {protein}g P • {carbs}g C • {fat}g F
+          </Text>
+        </View>
       </TouchableOpacity>
       <TouchableOpacity onPress={confirmDelete} hitSlop={8}>
         <Ionicons name="trash-outline" size={20} color={colors.alert} />
@@ -54,6 +67,18 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   details: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
+  thumb: {
+    width: 48,
+    height: 48,
+    borderRadius: 8,
+    backgroundColor: colors.surface,
+  },
+  text: {
     flex: 1,
   },
   name: {
