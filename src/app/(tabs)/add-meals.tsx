@@ -1,7 +1,9 @@
 import { addMeal } from "@/storage/meals";
 import { colors, globalStyles } from "@/styles/global";
+import { router } from "expo-router";
 import { useState } from "react";
 import {
+  Alert,
   StyleSheet,
   Text,
   TextInput,
@@ -9,31 +11,55 @@ import {
   View,
 } from "react-native";
 
+const toNumber = (value: string) => {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : null;
+};
+
 export default function AddMealScreen() {
   const [name, setName] = useState("");
   const [calories, setCalories] = useState("");
   const [protein, setProtein] = useState("");
   const [carbs, setCarbs] = useState("");
   const [fat, setFat] = useState("");
+  const [saving, setSaving] = useState(false);
 
-  // TextInput always stores strings. Convert to numbers here before INSERT.
   const handleAddMeal = async () => {
-    await addMeal({
-      name,
-      // calories is an integer column — round so "100.4" doesn't fail.
-      calories: Math.round(Number(calories)) || 0,
-      // Number("") is NaN; || 0 turns empty fields into 0.
-      protein: Number(protein) || 0,
-      carbs: Number(carbs) || 0,
-      fat: Number(fat) || 0,
-    });
+    if (saving) return;
 
-    // Reset the form so the next meal isn't pre-filled.
+    const trimmedName = name.trim();
+    const parsedCalories = toNumber(calories);
+
+    if (!trimmedName || parsedCalories === null) {
+      Alert.alert("Missing info", "Please enter a meal name and calories.");
+      return;
+    }
+
+    setSaving(true);
+    try {
+      await addMeal({
+        name: trimmedName,
+        calories: Math.round(parsedCalories),
+        protein: toNumber(protein) ?? 0,
+        carbs: toNumber(carbs) ?? 0,
+        fat: toNumber(fat) ?? 0,
+      });
+    } catch {
+      Alert.alert("Couldn't save", "Something went wrong. Try again.");
+      return;
+    } finally {
+      setSaving(false);
+    }
+
+    // Tabs stay mounted, so clear the form for the next visit.
     setName("");
     setCalories("");
     setProtein("");
     setCarbs("");
     setFat("");
+
+    // Switch to the Home tab (push would stack another Home on this tab).
+    router.navigate("/");
   };
 
   return (
@@ -84,8 +110,14 @@ export default function AddMealScreen() {
         />
       </View>
 
-      <TouchableOpacity style={styles.button} onPress={handleAddMeal}>
-        <Text style={styles.buttonText}>Add Meal</Text>
+      <TouchableOpacity
+        style={styles.button}
+        onPress={handleAddMeal}
+        disabled={saving}
+      >
+        <Text style={styles.buttonText}>
+          {saving ? "Adding..." : "Add Meal"}
+        </Text>
       </TouchableOpacity>
     </View>
   );
