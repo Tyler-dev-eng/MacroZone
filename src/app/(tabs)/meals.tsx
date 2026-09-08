@@ -105,6 +105,8 @@ export default function MealsScreen() {
                   carbs={meal.carbs}
                   fat={meal.fat}
                   imageUri={meal.imageUri}
+                  mealType={meal.mealType}
+                  createdAt={meal.createdAt}
                   onPress={() =>
                     router.push({
                       pathname: "/meal/[id]",

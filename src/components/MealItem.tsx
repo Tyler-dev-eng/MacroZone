@@ -1,4 +1,5 @@
 import { colors } from "@/styles/global";
+import { formatLoggedAtTime, mealTypeLabel } from "@/utils/mealType";
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { Alert, StyleSheet, Text, TouchableOpacity, View } from "react-native";
@@ -10,6 +11,8 @@ type MealItemProps = {
   carbs: number;
   fat: number;
   imageUri?: string | null;
+  mealType?: string | null;
+  createdAt?: string | null;
   onPress: () => void;
   onLogAgain?: () => void;
   onDelete?: () => void;
@@ -22,6 +25,8 @@ export default function MealItem({
   carbs,
   fat,
   imageUri,
+  mealType,
+  createdAt,
   onPress,
   onLogAgain,
   onDelete,
@@ -47,6 +52,16 @@ export default function MealItem({
         ) : null}
         <View style={styles.text}>
           <Text style={styles.name}>{name}</Text>
+          {mealType || createdAt ? (
+            <Text style={styles.meta}>
+              {[
+                mealType ? mealTypeLabel(mealType) : null,
+                createdAt ? formatLoggedAtTime(createdAt) : null,
+              ]
+                .filter(Boolean)
+                .join(" · ")}
+            </Text>
+          ) : null}
           <Text style={styles.macros}>
             {calories} cal • {protein}g P • {carbs}g C • {fat}g F
           </Text>
@@ -105,6 +120,11 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
     color: "#ffffff",
+  },
+  meta: {
+    fontSize: 12,
+    color: colors.textSecondary,
+    marginTop: 2,
   },
   macros: {
     fontSize: 13,

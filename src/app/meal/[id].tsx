@@ -1,6 +1,9 @@
+import LoggedAtField from "@/components/LoggedAtField";
 import MealPhotoPicker from "@/components/MealPhotoPicker";
+import MealTypePicker from "@/components/MealTypePicker";
 import { getMeal, updateMeal, type Meal } from "@/storage/meals";
 import { colors, globalStyles } from "@/styles/global";
+import { defaultMealType, isMealType, type MealType } from "@/utils/mealType";
 import { Ionicons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
@@ -30,6 +33,8 @@ export default function MealDetailsScreen() {
   const [carbs, setCarbs] = useState("");
   const [fat, setFat] = useState("");
   const [imageUri, setImageUri] = useState<string | null>(null);
+  const [mealType, setMealType] = useState<MealType>(defaultMealType);
+  const [loggedAt, setLoggedAt] = useState(() => new Date());
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
@@ -45,6 +50,8 @@ export default function MealDetailsScreen() {
         setCarbs(String(row.carbs));
         setFat(String(row.fat));
         setImageUri(row.imageUri);
+        setMealType(isMealType(row.mealType) ? row.mealType : "snack");
+        setLoggedAt(new Date(row.createdAt));
       }
       setLoading(false);
     });
@@ -71,6 +78,8 @@ export default function MealDetailsScreen() {
         carbs: toNumber(carbs) ?? 0,
         fat: toNumber(fat) ?? 0,
         imageUri,
+        mealType,
+        createdAt: loggedAt.toISOString(),
       });
       router.back();
     } catch {
@@ -100,14 +109,6 @@ export default function MealDetailsScreen() {
     );
   }
 
-  const loggedAt = new Date(meal.createdAt).toLocaleString("en-US", {
-    weekday: "short",
-    month: "short",
-    day: "numeric",
-    hour: "numeric",
-    minute: "2-digit",
-  });
-
   return (
     <ScrollView
       style={globalStyles.container}
@@ -120,9 +121,11 @@ export default function MealDetailsScreen() {
       </TouchableOpacity>
 
       <Text style={globalStyles.title}>Meal details</Text>
-      <Text style={styles.meta}>Logged {loggedAt}</Text>
 
       <MealPhotoPicker uri={imageUri} onChange={setImageUri} />
+
+      <MealTypePicker value={mealType} onChange={setMealType} />
+      <LoggedAtField value={loggedAt} onChange={setLoggedAt} />
 
       <TextInput
         style={styles.input}
@@ -190,11 +193,6 @@ const styles = StyleSheet.create({
   backText: {
     color: colors.primary,
     fontSize: 16,
-  },
-  meta: {
-    color: colors.textSecondary,
-    fontSize: 14,
-    marginTop: 6,
   },
   input: {
     backgroundColor: colors.surface,

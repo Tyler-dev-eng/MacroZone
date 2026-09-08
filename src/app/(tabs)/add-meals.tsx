@@ -1,6 +1,9 @@
+import LoggedAtField from "@/components/LoggedAtField";
 import MealPhotoPicker from "@/components/MealPhotoPicker";
+import MealTypePicker from "@/components/MealTypePicker";
 import { addMeal } from "@/storage/meals";
 import { colors, globalStyles } from "@/styles/global";
+import { defaultMealType, type MealType } from "@/utils/mealType";
 import { router } from "expo-router";
 import { useState } from "react";
 import {
@@ -25,6 +28,8 @@ export default function AddMealScreen() {
   const [carbs, setCarbs] = useState("");
   const [fat, setFat] = useState("");
   const [imageUri, setImageUri] = useState<string | null>(null);
+  const [mealType, setMealType] = useState<MealType>(defaultMealType);
+  const [loggedAt, setLoggedAt] = useState(() => new Date());
   const [saving, setSaving] = useState(false);
 
   const handleAddMeal = async () => {
@@ -47,6 +52,8 @@ export default function AddMealScreen() {
         carbs: toNumber(carbs) ?? 0,
         fat: toNumber(fat) ?? 0,
         imageUri,
+        mealType,
+        createdAt: loggedAt.toISOString(),
       });
     } catch {
       Alert.alert("Couldn't save", "Something went wrong. Try again.");
@@ -62,6 +69,9 @@ export default function AddMealScreen() {
     setCarbs("");
     setFat("");
     setImageUri(null);
+    const now = new Date();
+    setMealType(defaultMealType(now));
+    setLoggedAt(now);
 
     // Switch to the Home tab (push would stack another Home on this tab).
     router.navigate("/");
@@ -76,6 +86,9 @@ export default function AddMealScreen() {
       <Text style={globalStyles.title}>Add Meal</Text>
 
       <MealPhotoPicker uri={imageUri} onChange={setImageUri} />
+
+      <MealTypePicker value={mealType} onChange={setMealType} />
+      <LoggedAtField value={loggedAt} onChange={setLoggedAt} />
 
       <TextInput
         style={styles.input}

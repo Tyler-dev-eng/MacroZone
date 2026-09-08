@@ -12,14 +12,16 @@ export const meals = sqliteTable("meals", {
   fat: real("fat").notNull(),
   // Local file URI for the optional meal photo.
   imageUri: text("image_uri"),
-  // JS field createdAt maps to the created_at column in SQLite.
+  // breakfast | lunch | dinner | snack
+  mealType: text("meal_type").notNull(),
+  // When the meal was eaten (editable). JS field createdAt maps to created_at.
   createdAt: text("created_at").notNull(),
 });
 
 // Row shape returned by SELECT (all columns, including generated ones).
 export type Meal = typeof meals.$inferSelect;
-// What the form sends — id and createdAt are added in addMeal().
-export type NewMeal = Omit<Meal, "id" | "createdAt">;
+// What the form sends — id is added in addMeal().
+export type NewMeal = Omit<Meal, "id">;
 
 // Single-row table for daily macro targets (always id = "default").
 export const targets = sqliteTable("targets", {

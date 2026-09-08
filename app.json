@@ -41,7 +41,8 @@
           "cameraPermission": "MacroZone uses your camera so you can photograph a meal.",
           "microphonePermission": false
         }
-      ]
+      ],
+      "@react-native-community/datetimepicker"
     ],
     "experiments": {
       "typedRoutes": true,

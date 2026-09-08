@@ -35,7 +35,7 @@ export const getMealsForDay = async (date = new Date()): Promise<Meal[]> => {
     .orderBy(desc(meals.createdAt));
 };
 
-// INSERT a row. The form only sends macros (NewMeal); we generate id + createdAt here.
+// INSERT a row. The form sends macros, meal type, and logged-at; we generate id here.
 export const addMeal = async (meal: NewMeal): Promise<Meal> => {
   const id = Date.now().toString();
   const imageUri = meal.imageUri ? persistMealImage(meal.imageUri, id) : null;
@@ -43,7 +43,7 @@ export const addMeal = async (meal: NewMeal): Promise<Meal> => {
   const newMeal: Meal = {
     ...meal,
     id,
-    createdAt: new Date().toISOString(),
+    createdAt: meal.createdAt,
     imageUri,
   };
 
@@ -77,7 +77,9 @@ export const logMealAgain = async (id: string): Promise<Meal> => {
     protein: meal.protein,
     carbs: meal.carbs,
     fat: meal.fat,
+    mealType: meal.mealType,
     imageUri: meal.imageUri,
+    createdAt: new Date().toISOString(),
   });
 };
 
