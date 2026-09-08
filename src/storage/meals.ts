@@ -28,3 +28,8 @@ export const addMeal = async (meal: NewMeal): Promise<Meal> => {
 export const deleteMeal = async (id: string): Promise<void> => {
   await db.delete(meals).where(eq(meals.id, id));
 };
+
+// DELETE ALL meals
+export const deleteAllMeals = async (): Promise<void> => {
+  await db.delete(meals);
+};

@@ -1,7 +1,7 @@
 import HomeHeader from "@/components/HomeHeader";
 import MacroGrid from "@/components/MacroGrid";
 import RecentMeals from "@/components/RecentMeals";
-import { deleteMeal, getMeals, Meal } from "@/storage/meals";
+import { deleteAllMeals, deleteMeal, getMeals, Meal } from "@/storage/meals";
 import { globalStyles } from "@/styles/global";
 import { useFocusEffect } from "expo-router";
 import { useCallback, useState } from "react";
@@ -20,6 +20,11 @@ export default function HomeScreen() {
     await fetchMeals();
   };
 
+  const handleClearAll = async () => {
+    await deleteAllMeals();
+    await fetchMeals();
+  };
+
   useFocusEffect(
     useCallback(() => {
       fetchMeals();
@@ -29,7 +34,7 @@ export default function HomeScreen() {
   return (
     <ScrollView style={globalStyles.container}>
       <Text style={globalStyles.title}>MacroZone</Text>
-      <HomeHeader />
+      <HomeHeader hasMeals={meals.length > 0} onClearAll={handleClearAll} />
       <MacroGrid meals={meals} />
       <RecentMeals meals={meals} onDeleteMeal={handleDeleteMeal} />
     </ScrollView>
