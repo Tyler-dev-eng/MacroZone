@@ -6,6 +6,11 @@ import {
   logMealAgain,
   Meal,
 } from "@/storage/meals";
+import {
+  getSavedMeals,
+  mealFingerprint,
+  toggleFavorite,
+} from "@/storage/savedMeals";
 import { colors, globalStyles } from "@/styles/global";
 import { formatHistoryDay } from "@/utils/dates";
 import { useFocusEffect, router } from "expo-router";
@@ -21,11 +26,13 @@ import {
 
 export default function MealsScreen() {
   const [meals, setMeals] = useState<Meal[]>([]);
+  const [favoriteKeys, setFavoriteKeys] = useState<Set<string>>(new Set());
   const [loggingId, setLoggingId] = useState<string | null>(null);
 
   const loadMeals = async () => {
-    const data = await getMeals();
+    const [data, saved] = await Promise.all([getMeals(), getSavedMeals()]);
     setMeals(data);
+    setFavoriteKeys(new Set(saved.map(mealFingerprint)));
   };
 
   const handleDeleteMeal = async (id: string) => {
@@ -44,6 +51,18 @@ export default function MealsScreen() {
       Alert.alert("Couldn't log", "Something went wrong. Try again.");
     } finally {
       setLoggingId(null);
+    }
+  };
+
+  const handleToggleFavorite = async (meal: Meal) => {
+    try {
+      await toggleFavorite(meal);
+      await loadMeals();
+    } catch {
+      Alert.alert(
+        "Couldn't update favorite",
+        "Something went wrong. Try again.",
+      );
     }
   };
 
@@ -114,6 +133,8 @@ export default function MealsScreen() {
                     })
                   }
                   onLogAgain={() => handleLogAgain(meal.id)}
+                  isFavorite={favoriteKeys.has(mealFingerprint(meal))}
+                  onToggleFavorite={() => handleToggleFavorite(meal)}
                   onDelete={() => handleDeleteMeal(meal.id)}
                 />
               </View>

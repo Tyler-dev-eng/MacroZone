@@ -34,3 +34,19 @@ export const targets = sqliteTable("targets", {
 
 export type Targets = typeof targets.$inferSelect;
 export type NewTargets = Omit<Targets, "id">;
+
+// Reusable meal templates (favorites). Independent of daily logs.
+export const savedMeals = sqliteTable("saved_meals", {
+  id: text("id").primaryKey(),
+  name: text("name").notNull(),
+  calories: integer("calories").notNull(),
+  protein: real("protein").notNull(),
+  carbs: real("carbs").notNull(),
+  fat: real("fat").notNull(),
+  imageUri: text("image_uri"),
+  mealType: text("meal_type").notNull(),
+  createdAt: text("created_at").notNull(),
+});
+
+export type SavedMeal = typeof savedMeals.$inferSelect;
+export type NewSavedMeal = Omit<SavedMeal, "id" | "createdAt">;

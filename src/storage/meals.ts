@@ -2,11 +2,7 @@
 // they should not talk to Drizzle or SQLite directly.
 import { db } from "@/db";
 import { meals, type Meal, type NewMeal } from "@/db/schema";
-import {
-  deleteAllMealImageFiles,
-  deleteMealImageFile,
-  persistMealImage,
-} from "@/storage/mealImages";
+import { deleteMealImageFile, persistMealImage } from "@/storage/mealImages";
 import { startOfLocalDay, startOfNextLocalDay } from "@/utils/dates";
 import { desc, eq, and, gte, lt } from "drizzle-orm";
 
@@ -58,9 +54,12 @@ export const deleteMeal = async (id: string): Promise<void> => {
   await db.delete(meals).where(eq(meals.id, id));
 };
 
-// DELETE ALL meals
+// DELETE ALL meals (does not remove saved favorites or their photos)
 export const deleteAllMeals = async (): Promise<void> => {
-  deleteAllMealImageFiles();
+  const all = await getMeals();
+  for (const meal of all) {
+    deleteMealImageFile(meal.imageUri);
+  }
   await db.delete(meals);
 };
 

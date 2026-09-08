@@ -1,5 +1,6 @@
 import MealItem from "@/components/MealItem";
 import { type Meal } from "@/storage/meals";
+import { mealFingerprint } from "@/storage/savedMeals";
 import { globalStyles } from "@/styles/global";
 import { router } from "expo-router";
 import { Text, View } from "react-native";
@@ -8,13 +9,17 @@ export default function RecentMeals({
   meals,
   title = "Today's meals",
   empty = "No meals logged today.",
+  favoriteKeys,
   onLogAgain,
+  onToggleFavorite,
   onDeleteMeal,
 }: {
   meals: Meal[];
   title?: string;
   empty?: string;
+  favoriteKeys: Set<string>;
   onLogAgain: (id: string) => void;
+  onToggleFavorite: (meal: Meal) => void;
   onDeleteMeal?: (id: string) => void;
 }) {
   return (
@@ -41,6 +46,8 @@ export default function RecentMeals({
               })
             }
             onLogAgain={() => onLogAgain(meal.id)}
+            isFavorite={favoriteKeys.has(mealFingerprint(meal))}
+            onToggleFavorite={() => onToggleFavorite(meal)}
             onDelete={onDeleteMeal ? () => onDeleteMeal(meal.id) : undefined}
           />
         ))

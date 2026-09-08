@@ -15,6 +15,8 @@ type MealItemProps = {
   createdAt?: string | null;
   onPress: () => void;
   onLogAgain?: () => void;
+  isFavorite?: boolean;
+  onToggleFavorite?: () => void;
   onDelete?: () => void;
 };
 
@@ -29,6 +31,8 @@ export default function MealItem({
   createdAt,
   onPress,
   onLogAgain,
+  isFavorite = false,
+  onToggleFavorite,
   onDelete,
 }: MealItemProps) {
   const confirmDelete = () => {
@@ -67,6 +71,24 @@ export default function MealItem({
           </Text>
         </View>
       </TouchableOpacity>
+      {onToggleFavorite ? (
+        <TouchableOpacity
+          onPress={onToggleFavorite}
+          hitSlop={8}
+          accessibilityRole="button"
+          accessibilityLabel={
+            isFavorite
+              ? `Remove ${name} from favorites`
+              : `Save ${name} as favorite`
+          }
+        >
+          <Ionicons
+            name={isFavorite ? "star" : "star-outline"}
+            size={20}
+            color={isFavorite ? colors.primary : colors.textSecondary}
+          />
+        </TouchableOpacity>
+      ) : null}
       {onLogAgain ? (
         <TouchableOpacity
           onPress={onLogAgain}

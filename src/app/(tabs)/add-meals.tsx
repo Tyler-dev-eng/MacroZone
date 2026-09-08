@@ -1,11 +1,18 @@
 import LoggedAtField from "@/components/LoggedAtField";
 import MealPhotoPicker from "@/components/MealPhotoPicker";
 import MealTypePicker from "@/components/MealTypePicker";
+import SavedMealsList from "@/components/SavedMealsList";
 import { addMeal } from "@/storage/meals";
+import {
+  deleteSavedMeal,
+  getSavedMeals,
+  saveMealAsFavorite,
+  type SavedMeal,
+} from "@/storage/savedMeals";
 import { colors, globalStyles } from "@/styles/global";
-import { defaultMealType, type MealType } from "@/utils/mealType";
-import { router } from "expo-router";
-import { useState } from "react";
+import { defaultMealType, isMealType, type MealType } from "@/utils/mealType";
+import { useFocusEffect, router } from "expo-router";
+import { useCallback, useState } from "react";
 import {
   Alert,
   ScrollView,
@@ -30,7 +37,46 @@ export default function AddMealScreen() {
   const [imageUri, setImageUri] = useState<string | null>(null);
   const [mealType, setMealType] = useState<MealType>(defaultMealType);
   const [loggedAt, setLoggedAt] = useState(() => new Date());
+  const [savedMeals, setSavedMeals] = useState<SavedMeal[]>([]);
+  const [saveAsFavorite, setSaveAsFavorite] = useState(false);
   const [saving, setSaving] = useState(false);
+
+  const loadSavedMeals = async () => {
+    const saved = await getSavedMeals();
+    setSavedMeals(saved);
+  };
+
+  useFocusEffect(
+    useCallback(() => {
+      void loadSavedMeals();
+    }, []),
+  );
+
+  const applySavedMeal = (saved: SavedMeal) => {
+    setName(saved.name);
+    setCalories(String(saved.calories));
+    setProtein(String(saved.protein));
+    setCarbs(String(saved.carbs));
+    setFat(String(saved.fat));
+    setImageUri(saved.imageUri);
+    setMealType(
+      isMealType(saved.mealType) ? saved.mealType : defaultMealType(),
+    );
+    setLoggedAt(new Date());
+    setSaveAsFavorite(false);
+  };
+
+  const handleRemoveSaved = async (id: string) => {
+    try {
+      await deleteSavedMeal(id);
+      await loadSavedMeals();
+    } catch {
+      Alert.alert(
+        "Couldn't update favorite",
+        "Something went wrong. Try again.",
+      );
+    }
+  };
 
   const handleAddMeal = async () => {
     if (saving) return;
@@ -45,7 +91,7 @@ export default function AddMealScreen() {
 
     setSaving(true);
     try {
-      await addMeal({
+      const created = await addMeal({
         name: trimmedName,
         calories: Math.round(parsedCalories),
         protein: toNumber(protein) ?? 0,
@@ -55,6 +101,9 @@ export default function AddMealScreen() {
         mealType,
         createdAt: loggedAt.toISOString(),
       });
+      if (saveAsFavorite) {
+        await saveMealAsFavorite(created);
+      }
     } catch {
       Alert.alert("Couldn't save", "Something went wrong. Try again.");
       return;
@@ -72,6 +121,7 @@ export default function AddMealScreen() {
     const now = new Date();
     setMealType(defaultMealType(now));
     setLoggedAt(now);
+    setSaveAsFavorite(false);
 
     // Switch to the Home tab (push would stack another Home on this tab).
     router.navigate("/");
@@ -84,6 +134,13 @@ export default function AddMealScreen() {
       contentContainerStyle={{ paddingBottom: 40 }}
     >
       <Text style={globalStyles.title}>Add Meal</Text>
+
+      <SavedMealsList
+        meals={savedMeals}
+        hint="Tap to fill the form"
+        onPress={applySavedMeal}
+        onRemove={handleRemoveSaved}
+      />
 
       <MealPhotoPicker uri={imageUri} onChange={setImageUri} />
 
@@ -135,6 +192,18 @@ export default function AddMealScreen() {
       </View>
 
       <TouchableOpacity
+        style={styles.favoriteToggle}
+        onPress={() => setSaveAsFavorite((prev) => !prev)}
+        accessibilityRole="button"
+        accessibilityState={{ selected: saveAsFavorite }}
+        accessibilityLabel="Save as favorite"
+      >
+        <Text style={styles.favoriteToggleText}>
+          {saveAsFavorite ? "★  Will save as favorite" : "☆  Save as favorite"}
+        </Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity
         style={styles.button}
         onPress={handleAddMeal}
         disabled={saving}
@@ -162,6 +231,15 @@ const styles = StyleSheet.create({
   },
   rowInput: {
     flex: 1,
+  },
+  favoriteToggle: {
+    marginTop: 20,
+    alignItems: "center",
+  },
+  favoriteToggleText: {
+    color: colors.primary,
+    fontSize: 14,
+    fontWeight: "600",
   },
   button: {
     backgroundColor: colors.primary,

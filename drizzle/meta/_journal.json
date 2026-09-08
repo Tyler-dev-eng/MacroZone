@@ -29,6 +29,13 @@
       "when": 1788898647289,
       "tag": "0003_lying_black_knight",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1788899331754,
+      "tag": "0004_jazzy_scourge",
+      "breakpoints": true
     }
   ]
 }

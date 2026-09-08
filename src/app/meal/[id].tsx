@@ -2,6 +2,7 @@ import LoggedAtField from "@/components/LoggedAtField";
 import MealPhotoPicker from "@/components/MealPhotoPicker";
 import MealTypePicker from "@/components/MealTypePicker";
 import { getMeal, updateMeal, type Meal } from "@/storage/meals";
+import { findSavedMeal, toggleFavorite } from "@/storage/savedMeals";
 import { colors, globalStyles } from "@/styles/global";
 import { defaultMealType, isMealType, type MealType } from "@/utils/mealType";
 import { Ionicons } from "@expo/vector-icons";
@@ -35,6 +36,7 @@ export default function MealDetailsScreen() {
   const [imageUri, setImageUri] = useState<string | null>(null);
   const [mealType, setMealType] = useState<MealType>(defaultMealType);
   const [loggedAt, setLoggedAt] = useState(() => new Date());
+  const [isFavorite, setIsFavorite] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
@@ -52,6 +54,7 @@ export default function MealDetailsScreen() {
         setImageUri(row.imageUri);
         setMealType(isMealType(row.mealType) ? row.mealType : "snack");
         setLoggedAt(new Date(row.createdAt));
+        void findSavedMeal(row).then((saved) => setIsFavorite(Boolean(saved)));
       }
       setLoading(false);
     });
@@ -89,6 +92,28 @@ export default function MealDetailsScreen() {
     }
   };
 
+  const handleToggleFavorite = async () => {
+    if (!meal) return;
+    try {
+      const next = await toggleFavorite({
+        ...meal,
+        name: name.trim() || meal.name,
+        calories: toNumber(calories) ?? meal.calories,
+        protein: toNumber(protein) ?? meal.protein,
+        carbs: toNumber(carbs) ?? meal.carbs,
+        fat: toNumber(fat) ?? meal.fat,
+        imageUri,
+        mealType,
+      });
+      setIsFavorite(next);
+    } catch {
+      Alert.alert(
+        "Couldn't update favorite",
+        "Something went wrong. Try again.",
+      );
+    }
+  };
+
   if (loading) {
     return (
       <View style={globalStyles.container}>
@@ -120,7 +145,23 @@ export default function MealDetailsScreen() {
         <Text style={styles.backText}>Back</Text>
       </TouchableOpacity>
 
-      <Text style={globalStyles.title}>Meal details</Text>
+      <View style={globalStyles.header}>
+        <Text style={globalStyles.title}>Meal details</Text>
+        <TouchableOpacity
+          onPress={() => void handleToggleFavorite()}
+          hitSlop={8}
+          accessibilityRole="button"
+          accessibilityLabel={
+            isFavorite ? "Remove from favorites" : "Save as favorite"
+          }
+        >
+          <Ionicons
+            name={isFavorite ? "star" : "star-outline"}
+            size={24}
+            color={isFavorite ? colors.primary : colors.textSecondary}
+          />
+        </TouchableOpacity>
+      </View>
 
       <MealPhotoPicker uri={imageUri} onChange={setImageUri} />
 
