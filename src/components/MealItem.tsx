@@ -8,6 +8,7 @@ type MealItemProps = {
   protein: number;
   carbs: number;
   fat: number;
+  onPress: () => void;
   onDelete: () => void;
 };
 
@@ -17,6 +18,7 @@ export default function MealItem({
   protein,
   carbs,
   fat,
+  onPress,
   onDelete,
 }: MealItemProps) {
   const confirmDelete = () => {
@@ -28,12 +30,12 @@ export default function MealItem({
 
   return (
     <View style={styles.container}>
-      <View style={styles.details}>
+      <TouchableOpacity style={styles.details} onPress={onPress}>
         <Text style={styles.name}>{name}</Text>
         <Text style={styles.macros}>
           {calories} cal • {protein}g P • {carbs}g C • {fat}g F
         </Text>
-      </View>
+      </TouchableOpacity>
       <TouchableOpacity onPress={confirmDelete} hitSlop={8}>
         <Ionicons name="trash-outline" size={20} color={colors.alert} />
       </TouchableOpacity>

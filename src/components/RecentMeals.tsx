@@ -1,6 +1,7 @@
 import MealItem from "@/components/MealItem";
 import { type Meal } from "@/storage/meals";
 import { globalStyles } from "@/styles/global";
+import { router } from "expo-router";
 import { Text, View } from "react-native";
 
 export default function RecentMeals({
@@ -26,6 +27,12 @@ export default function RecentMeals({
               protein={meal.protein}
               carbs={meal.carbs}
               fat={meal.fat}
+              onPress={() =>
+                router.push({
+                  pathname: "/meal/[id]",
+                  params: { id: meal.id },
+                })
+              }
               onDelete={() => onDeleteMeal(meal.id)}
             />
           ))

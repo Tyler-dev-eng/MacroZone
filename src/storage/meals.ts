@@ -4,8 +4,13 @@ import { db } from "@/db";
 import { meals, type Meal, type NewMeal } from "@/db/schema";
 import { desc, eq } from "drizzle-orm";
 
-// Re-export schema types so screens can import from this file instead of @/db/schema.
 export type { Meal, NewMeal };
+
+// SELECT * FROM meals WHERE id = ?
+export const getMeal = async (id: string): Promise<Meal | undefined> => {
+  const [meal] = await db.select().from(meals).where(eq(meals.id, id));
+  return meal;
+};
 
 // SELECT * FROM meals ORDER BY created_at DESC
 export const getMeals = async (): Promise<Meal[]> => {
@@ -32,4 +37,9 @@ export const deleteMeal = async (id: string): Promise<void> => {
 // DELETE ALL meals
 export const deleteAllMeals = async (): Promise<void> => {
   await db.delete(meals);
+};
+
+// UPDATE A MEAL
+export const updateMeal = async (meal: Meal): Promise<void> => {
+  await db.update(meals).set(meal).where(eq(meals.id, meal.id));
 };

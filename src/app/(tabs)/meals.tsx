@@ -1,7 +1,7 @@
 import MealItem from "@/components/MealItem";
 import { deleteAllMeals, deleteMeal, getMeals, Meal } from "@/storage/meals";
 import { colors, globalStyles } from "@/styles/global";
-import { useFocusEffect } from "expo-router";
+import { useFocusEffect, router } from "expo-router";
 import { useCallback, useState } from "react";
 import { Alert, ScrollView, Text, TouchableOpacity, View } from "react-native";
 
@@ -58,6 +58,12 @@ export default function MealsScreen() {
               protein={meal.protein}
               carbs={meal.carbs}
               fat={meal.fat}
+              onPress={() =>
+                router.push({
+                  pathname: "/meal/[id]",
+                  params: { id: meal.id },
+                })
+              }
               onDelete={() => handleDeleteMeal(meal.id)}
             />
           ))
