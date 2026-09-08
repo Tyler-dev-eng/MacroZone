@@ -1,5 +1,11 @@
 import MealItem from "@/components/MealItem";
-import { deleteAllMeals, deleteMeal, getMeals, Meal } from "@/storage/meals";
+import {
+  deleteAllMeals,
+  deleteMeal,
+  getMeals,
+  logMealAgain,
+  Meal,
+} from "@/storage/meals";
 import { colors, globalStyles } from "@/styles/global";
 import { formatHistoryDay } from "@/utils/dates";
 import { useFocusEffect, router } from "expo-router";
@@ -15,6 +21,7 @@ import {
 
 export default function MealsScreen() {
   const [meals, setMeals] = useState<Meal[]>([]);
+  const [loggingId, setLoggingId] = useState<string | null>(null);
 
   const loadMeals = async () => {
     const data = await getMeals();
@@ -24,6 +31,20 @@ export default function MealsScreen() {
   const handleDeleteMeal = async (id: string) => {
     await deleteMeal(id);
     await loadMeals();
+  };
+
+  const handleLogAgain = async (id: string) => {
+    if (loggingId) return;
+
+    setLoggingId(id);
+    try {
+      await logMealAgain(id);
+      await loadMeals();
+    } catch {
+      Alert.alert("Couldn't log", "Something went wrong. Try again.");
+    } finally {
+      setLoggingId(null);
+    }
   };
 
   const handleClearAll = async () => {
@@ -90,6 +111,7 @@ export default function MealsScreen() {
                       params: { id: meal.id },
                     })
                   }
+                  onLogAgain={() => handleLogAgain(meal.id)}
                   onDelete={() => handleDeleteMeal(meal.id)}
                 />
               </View>

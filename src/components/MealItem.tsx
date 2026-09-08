@@ -11,7 +11,8 @@ type MealItemProps = {
   fat: number;
   imageUri?: string | null;
   onPress: () => void;
-  onDelete: () => void;
+  onLogAgain?: () => void;
+  onDelete?: () => void;
 };
 
 export default function MealItem({
@@ -22,9 +23,11 @@ export default function MealItem({
   fat,
   imageUri,
   onPress,
+  onLogAgain,
   onDelete,
 }: MealItemProps) {
   const confirmDelete = () => {
+    if (!onDelete) return;
     Alert.alert("Delete meal?", `"${name}" will be removed.`, [
       { text: "Cancel", style: "cancel" },
       { text: "Delete", style: "destructive", onPress: onDelete },
@@ -49,9 +52,26 @@ export default function MealItem({
           </Text>
         </View>
       </TouchableOpacity>
-      <TouchableOpacity onPress={confirmDelete} hitSlop={8}>
-        <Ionicons name="trash-outline" size={20} color={colors.alert} />
-      </TouchableOpacity>
+      {onLogAgain ? (
+        <TouchableOpacity
+          onPress={onLogAgain}
+          hitSlop={8}
+          accessibilityRole="button"
+          accessibilityLabel={`Log ${name} again`}
+        >
+          <Ionicons name="copy-outline" size={20} color={colors.primary} />
+        </TouchableOpacity>
+      ) : null}
+      {onDelete ? (
+        <TouchableOpacity
+          onPress={confirmDelete}
+          hitSlop={8}
+          accessibilityRole="button"
+          accessibilityLabel={`Delete ${name}`}
+        >
+          <Ionicons name="trash-outline" size={20} color={colors.alert} />
+        </TouchableOpacity>
+      ) : null}
     </View>
   );
 }

@@ -64,6 +64,23 @@ export const deleteAllMeals = async (): Promise<void> => {
   await db.delete(meals);
 };
 
+/** Copies a meal into a new row dated now (photo included). */
+export const logMealAgain = async (id: string): Promise<Meal> => {
+  const meal = await getMeal(id);
+  if (!meal) {
+    throw new Error("Meal not found");
+  }
+
+  return addMeal({
+    name: meal.name,
+    calories: meal.calories,
+    protein: meal.protein,
+    carbs: meal.carbs,
+    fat: meal.fat,
+    imageUri: meal.imageUri,
+  });
+};
+
 // UPDATE A MEAL
 export const updateMeal = async (meal: Meal): Promise<void> => {
   const existing = await getMeal(meal.id);

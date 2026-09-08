@@ -6,16 +6,22 @@ import { Text, View } from "react-native";
 
 export default function RecentMeals({
   meals,
+  title = "Today's meals",
+  empty = "No meals logged today.",
+  onLogAgain,
   onDeleteMeal,
 }: {
   meals: Meal[];
-  onDeleteMeal: (id: string) => void;
+  title?: string;
+  empty?: string;
+  onLogAgain: (id: string) => void;
+  onDeleteMeal?: (id: string) => void;
 }) {
   return (
     <View style={{ marginTop: 30 }}>
-      <Text style={globalStyles.sectionTitle}>{"Today's meals"}</Text>
+      <Text style={globalStyles.sectionTitle}>{title}</Text>
       {meals.length === 0 ? (
-        <Text style={globalStyles.empty}>No meals logged today.</Text>
+        <Text style={globalStyles.empty}>{empty}</Text>
       ) : (
         meals.map((meal) => (
           <MealItem
@@ -32,7 +38,8 @@ export default function RecentMeals({
                 params: { id: meal.id },
               })
             }
-            onDelete={() => onDeleteMeal(meal.id)}
+            onLogAgain={() => onLogAgain(meal.id)}
+            onDelete={onDeleteMeal ? () => onDeleteMeal(meal.id) : undefined}
           />
         ))
       )}
