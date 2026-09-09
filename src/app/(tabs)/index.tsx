@@ -2,6 +2,7 @@ import HomeHeader from "@/components/HomeHeader";
 import MacroGrid from "@/components/MacroGrid";
 import RecentMeals from "@/components/RecentMeals";
 import SavedMealsList from "@/components/SavedMealsList";
+import ZoneBanner from "@/components/ZoneBanner";
 import {
   deleteMeal,
   getMeals,
@@ -118,6 +119,7 @@ export default function HomeScreen() {
     <ScrollView ref={scrollRef} style={globalStyles.container}>
       <Text style={globalStyles.title}>MacroZone</Text>
       <HomeHeader />
+      <ZoneBanner meals={meals} targets={targets} />
       <MacroGrid meals={meals} targets={targets} />
       <SavedMealsList
         meals={savedMeals}

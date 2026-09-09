@@ -1,5 +1,6 @@
 import { Meal } from "@/storage/meals";
 import { type Targets } from "@/storage/targets";
+import { sumMealMacros } from "@/utils/zone";
 import { StyleSheet, View } from "react-native";
 import MacroCard from "./MacroCard";
 
@@ -9,15 +10,7 @@ type MacroGridProps = {
 };
 
 export default function MacroGrid({ meals, targets }: MacroGridProps) {
-  const totals = meals.reduce(
-    (acc, meal) => ({
-      calories: acc.calories + meal.calories,
-      protein: acc.protein + meal.protein,
-      carbs: acc.carbs + meal.carbs,
-      fat: acc.fat + meal.fat,
-    }),
-    { calories: 0, protein: 0, carbs: 0, fat: 0 },
-  );
+  const totals = sumMealMacros(meals);
 
   return (
     <View style={styles.grid}>
