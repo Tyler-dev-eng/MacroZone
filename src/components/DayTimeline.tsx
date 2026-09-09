@@ -212,10 +212,6 @@ export default function DayTimeline({
             />
           ))}
         </View>
-      ) : meals.length === 0 ? (
-        <Text style={styles.emptyHint}>
-          Tap a stop to log breakfast, lunch, dinner, or a snack.
-        </Text>
       ) : null}
     </View>
   );
@@ -427,11 +423,6 @@ const styles = StyleSheet.create({
     marginTop: 1,
     fontSize: 11,
     color: colors.textSecondary,
-  },
-  emptyHint: {
-    marginTop: 14,
-    color: colors.textSecondary,
-    fontSize: 14,
   },
   slotMeals: {
     marginTop: 16,

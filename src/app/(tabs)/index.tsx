@@ -4,6 +4,7 @@ import KeyboardScrollView from "@/components/KeyboardScrollView";
 import MacroGrid from "@/components/MacroGrid";
 import RecentMeals from "@/components/RecentMeals";
 import SavedMealsList from "@/components/SavedMealsList";
+import StartDayCard from "@/components/StartDayCard";
 import ZoneBanner from "@/components/ZoneBanner";
 import {
   deleteMeal,
@@ -121,11 +122,21 @@ export default function HomeScreen() {
     <KeyboardScrollView ref={scrollRef} style={globalStyles.container}>
       <Text style={globalStyles.title}>MacroZone</Text>
       <HomeHeader />
-      <ZoneBanner meals={meals} targets={targets} />
-      <MacroGrid meals={meals} targets={targets} />
+      {meals.length === 0 ? (
+        <StartDayCard />
+      ) : (
+        <>
+          <ZoneBanner meals={meals} targets={targets} />
+          <MacroGrid meals={meals} targets={targets} />
+        </>
+      )}
       <SavedMealsList
         meals={savedMeals}
-        hint="Tap to log today"
+        hint={
+          meals.length === 0
+            ? "Or pick a favorite to log it"
+            : "Tap to log today"
+        }
         onPress={handleLogSaved}
         onRemove={handleRemoveSaved}
       />
