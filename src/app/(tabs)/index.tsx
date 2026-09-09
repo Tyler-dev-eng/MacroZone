@@ -31,7 +31,7 @@ export default function HomeScreen() {
   const [loggingId, setLoggingId] = useState<string | null>(null);
 
   const fetchHomeData = async () => {
-    const [fetchedMeals, allMeals, fetchedSaved, fetchedTargets] =
+    const [fetchedMeals, fetchedHistory, fetchedSaved, fetchedTargets] =
       await Promise.all([
         getMealsForDay(),
         getMeals(),
@@ -41,7 +41,7 @@ export default function HomeScreen() {
     const todayIds = new Set(fetchedMeals.map((meal) => meal.id));
     setMeals(fetchedMeals);
     setRecentPastMeals(
-      allMeals.filter((meal) => !todayIds.has(meal.id)).slice(0, 5),
+      fetchedHistory.filter((meal) => !todayIds.has(meal.id)).slice(0, 5),
     );
     setSavedMeals(fetchedSaved);
     setTargets(fetchedTargets);
