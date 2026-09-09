@@ -12,7 +12,12 @@ import {
 } from "@/storage/savedMeals";
 import { useResetScrollOnFocus } from "@/hooks/useResetScrollOnFocus";
 import { colors, globalStyles } from "@/styles/global";
-import { defaultMealType, isMealType, type MealType } from "@/utils/mealType";
+import {
+  defaultMealType,
+  isMealType,
+  MEAL_TYPE_META,
+  type MealType,
+} from "@/utils/mealType";
 import { useFocusEffect, router, useLocalSearchParams } from "expo-router";
 import { useCallback, useState } from "react";
 import {
@@ -212,7 +217,10 @@ export default function AddMealScreen() {
       </TouchableOpacity>
 
       <TouchableOpacity
-        style={styles.button}
+        style={[
+          styles.button,
+          { backgroundColor: MEAL_TYPE_META[mealType].color },
+        ]}
         onPress={handleAddMeal}
         disabled={saving}
       >
@@ -253,7 +261,6 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   button: {
-    backgroundColor: colors.primary,
     padding: 16,
     borderRadius: 10,
     alignItems: "center",

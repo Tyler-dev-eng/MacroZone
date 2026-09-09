@@ -2,12 +2,14 @@ import { type Meal } from "@/storage/meals";
 import { type Targets } from "@/storage/targets";
 import { colors } from "@/styles/global";
 import { withAlpha } from "@/utils/color";
+import { localDayKey } from "@/utils/dates";
 import {
   buildDailyMacros,
   dayNumberLabel,
   weekdayLabel,
   type DayMacros,
 } from "@/utils/trend";
+import { MEAL_TYPE_META, MEAL_TYPES, groupMealsByType } from "@/utils/mealType";
 import {
   getMacroRange,
   getZoneStatus,
@@ -15,6 +17,7 @@ import {
   type ZoneKind,
   type ZoneStatus,
 } from "@/utils/zone";
+import MealTypeBadge from "@/components/MealTypeBadge";
 import { Ionicons } from "@expo/vector-icons";
 import { useMemo, useState } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
@@ -119,6 +122,12 @@ export default function TrendChart({ meals, targets }: TrendChartProps) {
     : days.length - 1;
   const selected = days[selectedIndex] ?? days[days.length - 1];
   const selectedZone = zoneByDay[selectedIndex] ?? zoneByDay[days.length - 1];
+  const selectedDayMeals = useMemo(() => {
+    if (!selected) return [];
+    return meals.filter(
+      (meal) => localDayKey(new Date(meal.createdAt)) === selected.key,
+    );
+  }, [meals, selected]);
 
   return (
     <View>
@@ -281,9 +290,57 @@ export default function TrendChart({ meals, targets }: TrendChartProps) {
                 );
               })}
             </View>
+            <MealTypeMix meals={selectedDayMeals} />
           </View>
         </View>
       ) : null}
+    </View>
+  );
+}
+
+function MealTypeMix({ meals }: { meals: Meal[] }) {
+  const groups = groupMealsByType(meals);
+  const slices = MEAL_TYPES.map((type) => ({
+    type,
+    calories: groups[type].reduce((sum, meal) => sum + meal.calories, 0),
+  })).filter((slice) => slice.calories > 0);
+  const total = slices.reduce((sum, slice) => sum + slice.calories, 0);
+  if (total === 0) return null;
+
+  return (
+    <View style={styles.mix}>
+      <Text style={styles.mixLabel}>By meal</Text>
+      <View
+        style={styles.mixBar}
+        accessibilityLabel={slices
+          .map(
+            (slice) => `${slice.type} ${Math.round(slice.calories)} calories`,
+          )
+          .join(", ")}
+      >
+        {slices.map((slice) => (
+          <View
+            key={slice.type}
+            style={[
+              styles.mixSegment,
+              {
+                flex: slice.calories,
+                backgroundColor: MEAL_TYPE_META[slice.type].color,
+              },
+            ]}
+          />
+        ))}
+      </View>
+      <View style={styles.mixChips}>
+        {slices.map((slice) => (
+          <View key={slice.type} style={styles.mixChip}>
+            <MealTypeBadge type={slice.type} />
+            <Text style={styles.mixCal}>
+              {Math.round(slice.calories).toLocaleString("en-US")} cal
+            </Text>
+          </View>
+        ))}
+      </View>
     </View>
   );
 }
@@ -658,6 +715,42 @@ const styles = StyleSheet.create({
   },
   summaryChipText: {
     fontSize: 13,
+    fontWeight: "700",
+  },
+  mix: {
+    marginTop: 16,
+  },
+  mixLabel: {
+    color: colors.textSecondary,
+    fontSize: 12,
+    fontWeight: "700",
+    marginBottom: 8,
+  },
+  mixBar: {
+    height: 10,
+    borderRadius: 5,
+    overflow: "hidden",
+    flexDirection: "row",
+    backgroundColor: "rgba(255, 255, 255, 0.08)",
+  },
+  mixSegment: {
+    height: "100%",
+  },
+  mixChips: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+    marginTop: 10,
+    alignItems: "center",
+  },
+  mixChip: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
+  mixCal: {
+    color: colors.text,
+    fontSize: 12,
     fontWeight: "700",
   },
 });

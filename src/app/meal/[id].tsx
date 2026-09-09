@@ -1,3 +1,4 @@
+import MealTypeBadge from "@/components/MealTypeBadge";
 import KeyboardScrollView from "@/components/KeyboardScrollView";
 import LoggedAtField from "@/components/LoggedAtField";
 import MealPhotoPicker from "@/components/MealPhotoPicker";
@@ -6,7 +7,12 @@ import { getMeal, updateMeal, type Meal } from "@/storage/meals";
 import { findSavedMeal, toggleFavorite } from "@/storage/savedMeals";
 import { useResetScrollOnFocus } from "@/hooks/useResetScrollOnFocus";
 import { colors, globalStyles } from "@/styles/global";
-import { defaultMealType, isMealType, type MealType } from "@/utils/mealType";
+import {
+  defaultMealType,
+  isMealType,
+  MEAL_TYPE_META,
+  type MealType,
+} from "@/utils/mealType";
 import { Ionicons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
@@ -148,7 +154,10 @@ export default function MealDetailsScreen() {
       </TouchableOpacity>
 
       <View style={globalStyles.header}>
-        <Text style={globalStyles.title}>Meal details</Text>
+        <View style={styles.titleBlock}>
+          <Text style={globalStyles.title}>Meal details</Text>
+          <MealTypeBadge type={mealType} />
+        </View>
         <TouchableOpacity
           onPress={() => void handleToggleFavorite()}
           hitSlop={8}
@@ -215,7 +224,10 @@ export default function MealDetailsScreen() {
       </View>
 
       <TouchableOpacity
-        style={styles.button}
+        style={[
+          styles.button,
+          { backgroundColor: MEAL_TYPE_META[mealType].color },
+        ]}
         onPress={handleSave}
         disabled={saving}
       >
@@ -240,6 +252,11 @@ const styles = StyleSheet.create({
     color: colors.primary,
     fontSize: 16,
   },
+  titleBlock: {
+    flex: 1,
+    gap: 8,
+    marginRight: 12,
+  },
   input: {
     backgroundColor: colors.surface,
     color: colors.text,
@@ -256,7 +273,6 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   button: {
-    backgroundColor: colors.primary,
     padding: 16,
     borderRadius: 10,
     alignItems: "center",
