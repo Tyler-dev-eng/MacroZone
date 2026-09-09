@@ -1,4 +1,5 @@
 import { colors } from "@/styles/global";
+import { withAlpha } from "@/utils/color";
 import { Ionicons } from "@expo/vector-icons";
 import { useEffect } from "react";
 import { StyleSheet, Text, View } from "react-native";
@@ -27,14 +28,6 @@ const formatAmount = (value: number, unit: string): string => {
     return `${rounded}${unit}`;
   }
   return Math.round(abs).toLocaleString("en-US");
-};
-
-const withAlpha = (hex: string, alpha: number): string => {
-  const normalized = hex.replace("#", "");
-  const r = Number.parseInt(normalized.slice(0, 2), 16);
-  const g = Number.parseInt(normalized.slice(2, 4), 16);
-  const b = Number.parseInt(normalized.slice(4, 6), 16);
-  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 };
 
 export default function MacroCard({

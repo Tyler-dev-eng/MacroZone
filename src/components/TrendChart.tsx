@@ -1,12 +1,14 @@
 import { type Meal } from "@/storage/meals";
 import { type Targets } from "@/storage/targets";
 import { colors } from "@/styles/global";
+import { withAlpha } from "@/utils/color";
 import {
   buildDailyMacros,
   dayNumberLabel,
   weekdayLabel,
   type DayMacros,
 } from "@/utils/trend";
+import { Ionicons } from "@expo/vector-icons";
 import { useMemo, useState } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
@@ -18,13 +20,32 @@ type Series = {
   label: string;
   color: string;
   unit: string;
+  icon: keyof typeof Ionicons.glyphMap;
 };
 
 const SERIES: Series[] = [
-  { key: "calories", label: "Calories", color: "#ff6b6b", unit: "" },
-  { key: "protein", label: "Protein", color: "#4ecdc4", unit: "g" },
-  { key: "carbs", label: "Carbs", color: "#ffd93d", unit: "g" },
-  { key: "fat", label: "Fat", color: "#6bcb77", unit: "g" },
+  {
+    key: "calories",
+    label: "Calories",
+    color: "#ff6b6b",
+    unit: "",
+    icon: "flame",
+  },
+  {
+    key: "protein",
+    label: "Protein",
+    color: "#4ecdc4",
+    unit: "g",
+    icon: "barbell",
+  },
+  {
+    key: "carbs",
+    label: "Carbs",
+    color: "#ffd93d",
+    unit: "g",
+    icon: "nutrition",
+  },
+  { key: "fat", label: "Fat", color: "#6bcb77", unit: "g", icon: "water" },
 ];
 
 type TrendChartProps = {
@@ -39,6 +60,13 @@ const formatAmount = (value: number, unit: string): string => {
   if (unit) return `${rounded}${unit}`;
   return rounded.toLocaleString("en-US");
 };
+
+const formatDay = (date: Date): string =>
+  date.toLocaleDateString("en-US", {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+  });
 
 export default function TrendChart({ meals, targets }: TrendChartProps) {
   const [range, setRange] = useState<Range>(7);
@@ -90,124 +118,206 @@ export default function TrendChart({ meals, targets }: TrendChartProps) {
         const values = days.map((day) => day[series.key]);
         const target = targets[series.key];
         const max = Math.max(target, ...values, 1);
+        const avg = Math.round(
+          days.reduce((sum, day) => sum + day[series.key], 0) / days.length,
+        );
         return (
           <BarChart
             key={series.key}
-            label={series.label}
-            color={series.color}
+            series={series}
             target={target}
             max={max}
+            avg={avg}
             values={values}
-            dayKeys={days.map((day) => day.key)}
+            days={days}
+            range={range}
             selectedKey={selected?.key ?? null}
             onSelect={setSelectedKey}
-            unit={series.unit}
           />
         );
       })}
 
-      <View style={styles.labels}>
-        {days.map((day) => (
-          <Text key={day.key} style={styles.dayLabel} numberOfLines={1}>
-            {range === 7 ? weekdayLabel(day.date) : dayNumberLabel(day.date)}
-          </Text>
-        ))}
-      </View>
-
       {selected ? (
-        <Text style={styles.caption}>
-          {selected.date.toLocaleDateString("en-US", {
-            weekday: "short",
-            month: "short",
-            day: "numeric",
-          })}
-          {" · "}
-          {SERIES.map((series, index) => {
-            const prefix = index === 0 ? "" : " · ";
-            const amount = formatAmount(selected[series.key], series.unit);
-            const suffix = series.unit ? "" : " cal";
-            return `${prefix}${amount}${suffix}`;
-          }).join("")}
-        </Text>
+        <View style={styles.summaryShadow}>
+          <View style={styles.summaryCard}>
+            <Text style={styles.summaryDate}>{formatDay(selected.date)}</Text>
+            <View style={styles.summaryChips}>
+              {SERIES.map((series) => (
+                <View
+                  key={series.key}
+                  style={[
+                    styles.summaryChip,
+                    { backgroundColor: withAlpha(series.color, 0.18) },
+                  ]}
+                >
+                  <Ionicons name={series.icon} size={12} color={series.color} />
+                  <Text
+                    style={[styles.summaryChipText, { color: series.color }]}
+                  >
+                    {formatAmount(selected[series.key], series.unit)}
+                    {series.unit ? "" : " cal"}
+                  </Text>
+                </View>
+              ))}
+            </View>
+            <Text style={styles.average}>
+              Avg{" "}
+              {SERIES.map((series, index) => {
+                const avg = Math.round(
+                  days.reduce((sum, day) => sum + day[series.key], 0) /
+                    days.length,
+                );
+                const prefix = index === 0 ? "" : " · ";
+                return `${prefix}${formatAmount(avg, series.unit)}${series.unit ? "" : " cal"}`;
+              }).join("")}
+            </Text>
+          </View>
+        </View>
       ) : null}
-      <Text style={styles.average}>
-        Avg{" "}
-        {SERIES.map((series, index) => {
-          const avg = Math.round(
-            days.reduce((sum, day) => sum + day[series.key], 0) / days.length,
-          );
-          const prefix = index === 0 ? "" : " · ";
-          return `${prefix}${formatAmount(avg, series.unit)}${series.unit ? "" : " cal"}`;
-        }).join("")}
-      </Text>
     </View>
   );
 }
 
 function BarChart({
-  label,
-  color,
+  series,
   target,
   max,
+  avg,
   values,
-  dayKeys,
+  days,
+  range,
   selectedKey,
   onSelect,
-  unit,
 }: {
-  label: string;
-  color: string;
+  series: Series;
   target: number;
   max: number;
+  avg: number;
   values: number[];
-  dayKeys: string[];
+  days: DayMacros[];
+  range: Range;
   selectedKey: string | null;
   onSelect: (key: string) => void;
-  unit: string;
 }) {
+  const { label, color, unit, icon } = series;
   const targetTop = Math.max(0, (1 - target / max) * CHART_HEIGHT);
+  const isOver = avg > target;
+  const fillColor = isOver ? colors.alert : color;
+  const percent =
+    target <= 0 ? (avg > 0 ? 100 : 0) : Math.round((avg / target) * 100);
+  const remainingLabel = isOver
+    ? `${formatAmount(avg - target, unit)} over`
+    : `${formatAmount(target - avg, unit)} under`;
+  const selectedDay = days.find((day) => day.key === selectedKey);
 
   return (
-    <View style={styles.chartBlock}>
-      <View style={styles.chartHeader}>
-        <Text style={styles.chartLabel}>{label}</Text>
-        <Text style={styles.chartTarget}>
-          goal {unit ? `${target}${unit}` : target.toLocaleString("en-US")}
-        </Text>
-      </View>
-      <View style={styles.plot}>
+    <View style={[styles.shadow, { shadowColor: color }]}>
+      <View
+        style={[
+          styles.card,
+          {
+            backgroundColor: withAlpha(color, 0.14),
+            borderColor: withAlpha(color, 0.38),
+          },
+        ]}
+      >
         <View
           pointerEvents="none"
-          style={[styles.targetLine, { top: targetTop }]}
-          accessibilityLabel={`${label} target`}
+          style={[styles.blob, { backgroundColor: color }]}
         />
-        {values.map((value, index) => {
-          const key = dayKeys[index] ?? String(index);
-          const height = Math.max(2, (value / max) * CHART_HEIGHT);
-          const isOver = value > target;
-          const isSelected = key === selectedKey;
-          return (
-            <TouchableOpacity
-              key={key}
-              style={styles.barHit}
-              onPress={() => onSelect(key)}
-              accessibilityRole="button"
-              accessibilityState={{ selected: isSelected }}
-              accessibilityLabel={`${label} ${formatAmount(value, unit)}`}
-            >
-              <View
-                style={[
-                  styles.bar,
-                  {
-                    height,
-                    backgroundColor: isOver ? colors.alert : color,
-                    opacity: isSelected ? 1 : 0.75,
-                  },
-                ]}
-              />
-            </TouchableOpacity>
-          );
-        })}
+
+        <View style={styles.topRow}>
+          <View
+            style={[
+              styles.iconWrap,
+              { backgroundColor: withAlpha(color, 0.28) },
+            ]}
+          >
+            <Ionicons name={icon} size={16} color={color} />
+          </View>
+          <Text style={[styles.chartLabel, { color }]}>{label}</Text>
+          <View
+            style={[
+              styles.percentChip,
+              { backgroundColor: withAlpha(fillColor, 0.22) },
+            ]}
+          >
+            <Text style={[styles.percent, { color: fillColor }]}>
+              {percent}%
+            </Text>
+          </View>
+        </View>
+
+        <Text style={styles.value}>{formatAmount(avg, unit)}</Text>
+        <Text style={styles.goal}>
+          avg of {formatAmount(target, unit)} goal
+        </Text>
+
+        <View
+          style={[
+            styles.remainingChip,
+            { backgroundColor: withAlpha(fillColor, isOver ? 0.22 : 0.16) },
+          ]}
+        >
+          <Text style={[styles.remaining, { color: fillColor }]}>
+            {remainingLabel}
+          </Text>
+        </View>
+
+        <View style={styles.plot}>
+          <View
+            pointerEvents="none"
+            style={[
+              styles.targetLine,
+              { top: targetTop, backgroundColor: withAlpha(color, 0.55) },
+            ]}
+            accessibilityLabel={`${label} target`}
+          />
+          {values.map((value, index) => {
+            const key = days[index]?.key ?? String(index);
+            const height = Math.max(2, (value / max) * CHART_HEIGHT);
+            const barOver = value > target;
+            const isSelected = key === selectedKey;
+            return (
+              <TouchableOpacity
+                key={key}
+                style={styles.barHit}
+                onPress={() => onSelect(key)}
+                accessibilityRole="button"
+                accessibilityState={{ selected: isSelected }}
+                accessibilityLabel={`${label} ${formatAmount(value, unit)}`}
+              >
+                <View
+                  style={[
+                    styles.bar,
+                    {
+                      height,
+                      backgroundColor: barOver ? colors.alert : color,
+                      opacity: isSelected ? 1 : 0.72,
+                    },
+                  ]}
+                />
+              </TouchableOpacity>
+            );
+          })}
+        </View>
+
+        <View style={styles.labels}>
+          {days.map((day) => (
+            <Text key={day.key} style={styles.dayLabel} numberOfLines={1}>
+              {range === 7 ? weekdayLabel(day.date) : dayNumberLabel(day.date)}
+            </Text>
+          ))}
+        </View>
+
+        {selectedDay ? (
+          <Text style={styles.caption}>
+            {formatDay(selectedDay.date)}
+            {" · "}
+            {formatAmount(selectedDay[series.key], unit)}
+            {unit ? "" : " cal"}
+          </Text>
+        ) : null}
       </View>
     </View>
   );
@@ -218,7 +328,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    marginBottom: 4,
+    marginBottom: 8,
   },
   toggles: {
     flexDirection: "row",
@@ -246,22 +356,77 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
     fontSize: 13,
   },
-  chartBlock: {
-    marginTop: 16,
+  shadow: {
+    marginTop: 14,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.32,
+    shadowRadius: 14,
+    elevation: 8,
   },
-  chartHeader: {
+  card: {
+    borderRadius: 20,
+    padding: 16,
+    overflow: "hidden",
+    borderWidth: 1,
+  },
+  blob: {
+    position: "absolute",
+    width: 92,
+    height: 92,
+    borderRadius: 46,
+    opacity: 0.22,
+    top: -34,
+    right: -28,
+  },
+  topRow: {
     flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 8,
+    alignItems: "center",
+    gap: 8,
+  },
+  iconWrap: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    alignItems: "center",
+    justifyContent: "center",
   },
   chartLabel: {
-    color: colors.text,
-    fontSize: 14,
-    fontWeight: "600",
+    flex: 1,
+    fontSize: 13,
+    fontWeight: "700",
   },
-  chartTarget: {
-    color: colors.textSecondary,
+  percentChip: {
+    borderRadius: 10,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+  },
+  percent: {
     fontSize: 12,
+    fontWeight: "800",
+  },
+  value: {
+    fontSize: 28,
+    fontWeight: "800",
+    color: colors.text,
+    marginTop: 12,
+    letterSpacing: -0.5,
+  },
+  goal: {
+    fontSize: 13,
+    color: colors.textSecondary,
+    marginTop: 2,
+  },
+  remainingChip: {
+    alignSelf: "flex-start",
+    marginTop: 10,
+    marginBottom: 12,
+    borderRadius: 8,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+  },
+  remaining: {
+    fontSize: 12,
+    fontWeight: "700",
   },
   plot: {
     height: CHART_HEIGHT,
@@ -275,7 +440,6 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     height: 1,
-    backgroundColor: "rgba(255, 255, 255, 0.25)",
   },
   barHit: {
     flex: 1,
@@ -286,7 +450,7 @@ const styles = StyleSheet.create({
   bar: {
     width: "70%",
     maxWidth: 18,
-    borderRadius: 3,
+    borderRadius: 6,
   },
   labels: {
     flexDirection: "row",
@@ -302,11 +466,51 @@ const styles = StyleSheet.create({
   caption: {
     color: colors.text,
     fontSize: 14,
-    marginTop: 16,
+    marginTop: 12,
+    fontWeight: "600",
+  },
+  summaryShadow: {
+    marginTop: 14,
+    shadowColor: colors.primary,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.22,
+    shadowRadius: 14,
+    elevation: 6,
+  },
+  summaryCard: {
+    borderRadius: 20,
+    padding: 16,
+    overflow: "hidden",
+    borderWidth: 1,
+    backgroundColor: withAlpha(colors.primary, 0.12),
+    borderColor: withAlpha(colors.primary, 0.32),
+  },
+  summaryDate: {
+    color: colors.text,
+    fontSize: 16,
+    fontWeight: "700",
+    marginBottom: 12,
+  },
+  summaryChips: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+  },
+  summaryChip: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    borderRadius: 10,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+  },
+  summaryChipText: {
+    fontSize: 13,
+    fontWeight: "700",
   },
   average: {
     color: colors.textSecondary,
     fontSize: 13,
-    marginTop: 4,
+    marginTop: 12,
   },
 });
