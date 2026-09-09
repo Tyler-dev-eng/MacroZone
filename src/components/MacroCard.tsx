@@ -86,15 +86,19 @@ export default function MacroCard({
         />
 
         <View style={styles.topRow}>
-          <View
-            style={[
-              styles.iconWrap,
-              { backgroundColor: withAlpha(color, 0.28) },
-            ]}
-          >
-            <Ionicons name={icon} size={16} color={color} />
+          <View style={styles.labelGroup}>
+            <View
+              style={[
+                styles.iconWrap,
+                { backgroundColor: withAlpha(color, 0.28) },
+              ]}
+            >
+              <Ionicons name={icon} size={16} color={color} />
+            </View>
+            <Text style={[styles.label, { color }]} numberOfLines={1}>
+              {label}
+            </Text>
           </View>
-          <Text style={[styles.label, { color }]}>{label}</Text>
           <View
             style={[
               styles.percentChip,
@@ -167,7 +171,15 @@ const styles = StyleSheet.create({
   topRow: {
     flexDirection: "row",
     alignItems: "center",
+    justifyContent: "space-between",
     gap: 8,
+  },
+  labelGroup: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    minWidth: 0,
   },
   iconWrap: {
     width: 28,
@@ -175,9 +187,10 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     alignItems: "center",
     justifyContent: "center",
+    flexShrink: 0,
   },
   label: {
-    flex: 1,
+    flexShrink: 1,
     fontSize: 13,
     fontWeight: "700",
   },
@@ -185,6 +198,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     paddingHorizontal: 8,
     paddingVertical: 3,
+    flexShrink: 0,
   },
   percent: {
     fontSize: 12,
