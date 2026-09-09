@@ -13,7 +13,7 @@ import {
 import { useResetScrollOnFocus } from "@/hooks/useResetScrollOnFocus";
 import { colors, globalStyles } from "@/styles/global";
 import { defaultMealType, isMealType, type MealType } from "@/utils/mealType";
-import { useFocusEffect, router } from "expo-router";
+import { useFocusEffect, router, useLocalSearchParams } from "expo-router";
 import { useCallback, useState } from "react";
 import {
   Alert,
@@ -31,6 +31,8 @@ const toNumber = (value: string) => {
 
 export default function AddMealScreen() {
   const scrollRef = useResetScrollOnFocus();
+  const params = useLocalSearchParams<{ type?: string | string[] }>();
+  const typeParam = Array.isArray(params.type) ? params.type[0] : params.type;
   const [name, setName] = useState("");
   const [calories, setCalories] = useState("");
   const [protein, setProtein] = useState("");
@@ -50,8 +52,12 @@ export default function AddMealScreen() {
 
   useFocusEffect(
     useCallback(() => {
+      if (typeParam && isMealType(typeParam)) {
+        setMealType(typeParam);
+        router.setParams({ type: undefined });
+      }
       void loadSavedMeals();
-    }, []),
+    }, [typeParam]),
   );
 
   const applySavedMeal = (saved: SavedMeal) => {
