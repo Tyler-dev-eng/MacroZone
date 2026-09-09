@@ -35,7 +35,7 @@ export default function TrendsScreen() {
       contentContainerStyle={styles.content}
     >
       <Text style={globalStyles.title}>Trends</Text>
-      <Text style={styles.subtitle}>Daily totals vs your targets</Text>
+      <Text style={styles.subtitle}>Days in the zone vs your targets</Text>
       <TrendChart meals={meals} targets={targets} />
     </KeyboardScrollView>
   );

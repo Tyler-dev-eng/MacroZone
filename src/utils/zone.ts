@@ -30,7 +30,19 @@ const MACROS: {
 ];
 
 /** Floor for "in the zone" — all macros at least this fraction of target, none over. */
-const IN_ZONE_MIN = 0.9;
+export const IN_ZONE_MIN = 0.9;
+
+export type MacroRange = "empty" | "short" | "inRange" | "over";
+
+/** Where one macro sits vs its target for a finished (or empty) day. */
+export const getMacroRange = (current: number, target: number): MacroRange => {
+  if (target <= 0) return current > 0 ? "over" : "empty";
+  if (current <= 0) return "empty";
+  if (current > target) return "over";
+  if (current / target >= IN_ZONE_MIN) return "inRange";
+  return "short";
+};
+
 /** Calorie progress at which a remaining gap reads as "close" instead of "on track". */
 const CLOSE_DAY_PROGRESS = 0.7;
 
@@ -142,3 +154,6 @@ export const getZoneStatus = (
     accent: furthest.key,
   };
 };
+
+export const isDayInZone = (totals: MacroTotals, targets: Targets): boolean =>
+  getZoneStatus(totals, targets).kind === "inZone";

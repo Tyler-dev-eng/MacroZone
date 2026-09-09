@@ -8,6 +8,13 @@ import {
   weekdayLabel,
   type DayMacros,
 } from "@/utils/trend";
+import {
+  getMacroRange,
+  getZoneStatus,
+  type MacroRange,
+  type ZoneKind,
+  type ZoneStatus,
+} from "@/utils/zone";
 import { Ionicons } from "@expo/vector-icons";
 import { useMemo, useState } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
@@ -48,6 +55,16 @@ const SERIES: Series[] = [
   { key: "fat", label: "Fat", color: "#6bcb77", unit: "g", icon: "water" },
 ];
 
+const ZONE_GREEN = "#6bcb77";
+
+const ZONE_DOT: Record<ZoneKind, string> = {
+  empty: colors.textSecondary,
+  onTrack: colors.primary,
+  close: "#ffd93d",
+  inZone: ZONE_GREEN,
+  over: colors.alert,
+};
+
 type TrendChartProps = {
   meals: Meal[];
   targets: Targets;
@@ -68,14 +85,40 @@ const formatDay = (date: Date): string =>
     day: "numeric",
   });
 
+const barColor = (range: MacroRange, seriesColor: string): string => {
+  if (range === "over") return colors.alert;
+  if (range === "inRange") return ZONE_GREEN;
+  if (range === "short") return seriesColor;
+  return "rgba(255, 255, 255, 0.18)";
+};
+
+const pastZoneCopy = (
+  status: ZoneStatus,
+): { title: string; detail: string } => {
+  if (status.kind === "empty") {
+    return { title: "No meals", detail: "Nothing logged" };
+  }
+  return { title: status.title, detail: status.detail };
+};
+
 export default function TrendChart({ meals, targets }: TrendChartProps) {
   const [range, setRange] = useState<Range>(7);
   const days = useMemo(() => buildDailyMacros(meals, range), [meals, range]);
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
 
-  const selected =
-    days.find((day) => day.key === selectedKey) ?? days[days.length - 1];
-  const loggedDays = days.filter((day) => day.calories > 0).length;
+  const zoneByDay = useMemo(
+    () => days.map((day) => getZoneStatus(day, targets)),
+    [days, targets],
+  );
+  const inZoneCount = zoneByDay.filter(
+    (status) => status.kind === "inZone",
+  ).length;
+
+  const selectedIndex = selectedKey
+    ? days.findIndex((day) => day.key === selectedKey)
+    : days.length - 1;
+  const selected = days[selectedIndex] ?? days[days.length - 1];
+  const selectedZone = zoneByDay[selectedIndex] ?? zoneByDay[days.length - 1];
 
   return (
     <View>
@@ -107,70 +150,137 @@ export default function TrendChart({ meals, targets }: TrendChartProps) {
             );
           })}
         </View>
-        <Text style={styles.loggedCount}>
-          {loggedDays === 0
-            ? "No meals in this range"
-            : `${loggedDays} day${loggedDays === 1 ? "" : "s"} logged`}
-        </Text>
+      </View>
+
+      <View style={[styles.scoreShadow, { shadowColor: ZONE_GREEN }]}>
+        <View style={styles.scoreCard}>
+          <View
+            pointerEvents="none"
+            style={[styles.blob, { backgroundColor: ZONE_GREEN }]}
+          />
+          <View style={styles.scoreTop}>
+            <View
+              style={[
+                styles.iconWrap,
+                { backgroundColor: withAlpha(ZONE_GREEN, 0.28) },
+              ]}
+            >
+              <Ionicons name="flash" size={16} color={ZONE_GREEN} />
+            </View>
+            <View style={styles.scoreText}>
+              <Text
+                style={styles.scoreValue}
+                accessibilityLabel={`${inZoneCount} of ${range} days in the zone`}
+              >
+                {inZoneCount} / {range}
+              </Text>
+              <Text style={styles.scoreLabel}>days in zone</Text>
+            </View>
+          </View>
+          <View style={styles.dots}>
+            {days.map((day, index) => {
+              const status = zoneByDay[index];
+              const isSelected = day.key === selected?.key;
+              return (
+                <TouchableOpacity
+                  key={day.key}
+                  style={styles.dotHit}
+                  onPress={() => setSelectedKey(day.key)}
+                  accessibilityRole="button"
+                  accessibilityState={{ selected: isSelected }}
+                  accessibilityLabel={`${formatDay(day.date)}, ${pastZoneCopy(status ?? getZoneStatus(day, targets)).title}`}
+                >
+                  <View
+                    style={[
+                      styles.dot,
+                      {
+                        backgroundColor: ZONE_DOT[status?.kind ?? "empty"],
+                        opacity: isSelected ? 1 : 0.55,
+                      },
+                    ]}
+                  />
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+        </View>
       </View>
 
       {SERIES.map((series) => {
         const values = days.map((day) => day[series.key]);
         const target = targets[series.key];
         const max = Math.max(target, ...values, 1);
-        const avg = Math.round(
-          days.reduce((sum, day) => sum + day[series.key], 0) / days.length,
-        );
+        const inRangeCount = values.filter(
+          (value) => getMacroRange(value, target) === "inRange",
+        ).length;
         return (
           <BarChart
             key={series.key}
             series={series}
             target={target}
             max={max}
-            avg={avg}
+            inRangeCount={inRangeCount}
+            range={range}
             values={values}
             days={days}
-            range={range}
             selectedKey={selected?.key ?? null}
             onSelect={setSelectedKey}
           />
         );
       })}
 
-      {selected ? (
-        <View style={styles.summaryShadow}>
-          <View style={styles.summaryCard}>
+      {selected && selectedZone ? (
+        <View
+          style={[
+            styles.summaryShadow,
+            { shadowColor: ZONE_DOT[selectedZone.kind] },
+          ]}
+        >
+          <View
+            style={[
+              styles.summaryCard,
+              {
+                backgroundColor: withAlpha(ZONE_DOT[selectedZone.kind], 0.12),
+                borderColor: withAlpha(ZONE_DOT[selectedZone.kind], 0.32),
+              },
+            ]}
+          >
             <Text style={styles.summaryDate}>{formatDay(selected.date)}</Text>
-            <View style={styles.summaryChips}>
-              {SERIES.map((series) => (
-                <View
-                  key={series.key}
-                  style={[
-                    styles.summaryChip,
-                    { backgroundColor: withAlpha(series.color, 0.18) },
-                  ]}
-                >
-                  <Ionicons name={series.icon} size={12} color={series.color} />
-                  <Text
-                    style={[styles.summaryChipText, { color: series.color }]}
-                  >
-                    {formatAmount(selected[series.key], series.unit)}
-                    {series.unit ? "" : " cal"}
-                  </Text>
-                </View>
-              ))}
-            </View>
-            <Text style={styles.average}>
-              Avg{" "}
-              {SERIES.map((series, index) => {
-                const avg = Math.round(
-                  days.reduce((sum, day) => sum + day[series.key], 0) /
-                    days.length,
-                );
-                const prefix = index === 0 ? "" : " · ";
-                return `${prefix}${formatAmount(avg, series.unit)}${series.unit ? "" : " cal"}`;
-              }).join("")}
+            <Text
+              style={[
+                styles.summaryZone,
+                { color: ZONE_DOT[selectedZone.kind] },
+              ]}
+            >
+              {pastZoneCopy(selectedZone).title}
             </Text>
+            <Text style={styles.summaryDetail}>
+              {pastZoneCopy(selectedZone).detail}
+            </Text>
+            <View style={styles.summaryChips}>
+              {SERIES.map((series) => {
+                const rangeKind = getMacroRange(
+                  selected[series.key],
+                  targets[series.key],
+                );
+                const tint = barColor(rangeKind, series.color);
+                return (
+                  <View
+                    key={series.key}
+                    style={[
+                      styles.summaryChip,
+                      { backgroundColor: withAlpha(tint, 0.2) },
+                    ]}
+                  >
+                    <Ionicons name={series.icon} size={12} color={tint} />
+                    <Text style={[styles.summaryChipText, { color: tint }]}>
+                      {formatAmount(selected[series.key], series.unit)}
+                      {series.unit ? "" : " cal"}
+                    </Text>
+                  </View>
+                );
+              })}
+            </View>
           </View>
         </View>
       ) : null}
@@ -182,33 +292,29 @@ function BarChart({
   series,
   target,
   max,
-  avg,
+  inRangeCount,
+  range,
   values,
   days,
-  range,
   selectedKey,
   onSelect,
 }: {
   series: Series;
   target: number;
   max: number;
-  avg: number;
+  inRangeCount: number;
+  range: Range;
   values: number[];
   days: DayMacros[];
-  range: Range;
   selectedKey: string | null;
   onSelect: (key: string) => void;
 }) {
   const { label, color, unit, icon } = series;
   const targetTop = Math.max(0, (1 - target / max) * CHART_HEIGHT);
-  const isOver = avg > target;
-  const fillColor = isOver ? colors.alert : color;
-  const percent =
-    target <= 0 ? (avg > 0 ? 100 : 0) : Math.round((avg / target) * 100);
-  const remainingLabel = isOver
-    ? `${formatAmount(avg - target, unit)} over`
-    : `${formatAmount(target - avg, unit)} under`;
   const selectedDay = days.find((day) => day.key === selectedKey);
+  const selectedRange = selectedDay
+    ? getMacroRange(selectedDay[series.key], target)
+    : null;
 
   return (
     <View style={[styles.shadow, { shadowColor: color }]}>
@@ -239,30 +345,16 @@ function BarChart({
           <View
             style={[
               styles.percentChip,
-              { backgroundColor: withAlpha(fillColor, 0.22) },
+              { backgroundColor: withAlpha(ZONE_GREEN, 0.22) },
             ]}
           >
-            <Text style={[styles.percent, { color: fillColor }]}>
-              {percent}%
+            <Text style={[styles.percent, { color: ZONE_GREEN }]}>
+              {inRangeCount} / {range}
             </Text>
           </View>
         </View>
 
-        <Text style={styles.value}>{formatAmount(avg, unit)}</Text>
-        <Text style={styles.goal}>
-          avg of {formatAmount(target, unit)} goal
-        </Text>
-
-        <View
-          style={[
-            styles.remainingChip,
-            { backgroundColor: withAlpha(fillColor, isOver ? 0.22 : 0.16) },
-          ]}
-        >
-          <Text style={[styles.remaining, { color: fillColor }]}>
-            {remainingLabel}
-          </Text>
-        </View>
+        <Text style={styles.goal}>days in range</Text>
 
         <View style={styles.plot}>
           <View
@@ -276,7 +368,7 @@ function BarChart({
           {values.map((value, index) => {
             const key = days[index]?.key ?? String(index);
             const height = Math.max(2, (value / max) * CHART_HEIGHT);
-            const barOver = value > target;
+            const macroRange = getMacroRange(value, target);
             const isSelected = key === selectedKey;
             return (
               <TouchableOpacity
@@ -285,15 +377,15 @@ function BarChart({
                 onPress={() => onSelect(key)}
                 accessibilityRole="button"
                 accessibilityState={{ selected: isSelected }}
-                accessibilityLabel={`${label} ${formatAmount(value, unit)}`}
+                accessibilityLabel={`${label} ${formatAmount(value, unit)}, ${macroRange === "inRange" ? "in range" : macroRange === "over" ? "over target" : macroRange === "short" ? "under target" : "no meals"}`}
               >
                 <View
                   style={[
                     styles.bar,
                     {
                       height,
-                      backgroundColor: barOver ? colors.alert : color,
-                      opacity: isSelected ? 1 : 0.72,
+                      backgroundColor: barColor(macroRange, color),
+                      opacity: isSelected ? 1 : 0.78,
                     },
                   ]}
                 />
@@ -303,19 +395,44 @@ function BarChart({
         </View>
 
         <View style={styles.labels}>
-          {days.map((day) => (
-            <Text key={day.key} style={styles.dayLabel} numberOfLines={1}>
-              {range === 7 ? weekdayLabel(day.date) : dayNumberLabel(day.date)}
-            </Text>
-          ))}
+          {days.map((day, index) => {
+            const macroRange = getMacroRange(values[index] ?? 0, target);
+            return (
+              <Text
+                key={day.key}
+                style={[
+                  styles.dayLabel,
+                  {
+                    color:
+                      macroRange === "empty"
+                        ? colors.textSecondary
+                        : barColor(macroRange, color),
+                  },
+                ]}
+                numberOfLines={1}
+              >
+                {range === 7
+                  ? weekdayLabel(day.date)
+                  : dayNumberLabel(day.date)}
+              </Text>
+            );
+          })}
         </View>
 
-        {selectedDay ? (
+        {selectedDay && selectedRange ? (
           <Text style={styles.caption}>
             {formatDay(selectedDay.date)}
             {" · "}
             {formatAmount(selectedDay[series.key], unit)}
             {unit ? "" : " cal"}
+            {" · "}
+            {selectedRange === "inRange"
+              ? "in range"
+              : selectedRange === "over"
+                ? "over"
+                : selectedRange === "short"
+                  ? "under"
+                  : "no meals"}
           </Text>
         ) : null}
       </View>
@@ -352,9 +469,54 @@ const styles = StyleSheet.create({
   toggleTextSelected: {
     color: colors.background,
   },
-  loggedCount: {
+  scoreShadow: {
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.32,
+    shadowRadius: 14,
+    elevation: 8,
+  },
+  scoreCard: {
+    borderRadius: 20,
+    padding: 16,
+    overflow: "hidden",
+    borderWidth: 1,
+    backgroundColor: withAlpha(ZONE_GREEN, 0.14),
+    borderColor: withAlpha(ZONE_GREEN, 0.38),
+  },
+  scoreTop: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
+  scoreText: {
+    flex: 1,
+  },
+  scoreValue: {
+    color: colors.text,
+    fontSize: 28,
+    fontWeight: "800",
+    letterSpacing: -0.5,
+  },
+  scoreLabel: {
     color: colors.textSecondary,
     fontSize: 13,
+    fontWeight: "600",
+    marginTop: 2,
+  },
+  dots: {
+    flexDirection: "row",
+    gap: 6,
+    marginTop: 8,
+    alignItems: "center",
+  },
+  dotHit: {
+    flex: 1,
+    minHeight: 44,
+    justifyContent: "center",
+  },
+  dot: {
+    height: 10,
+    borderRadius: 5,
   },
   shadow: {
     marginTop: 14,
@@ -404,29 +566,11 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: "800",
   },
-  value: {
-    fontSize: 28,
-    fontWeight: "800",
-    color: colors.text,
-    marginTop: 12,
-    letterSpacing: -0.5,
-  },
   goal: {
     fontSize: 13,
     color: colors.textSecondary,
-    marginTop: 2,
-  },
-  remainingChip: {
-    alignSelf: "flex-start",
-    marginTop: 10,
+    marginTop: 8,
     marginBottom: 12,
-    borderRadius: 8,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-  },
-  remaining: {
-    fontSize: 12,
-    fontWeight: "700",
   },
   plot: {
     height: CHART_HEIGHT,
@@ -460,8 +604,8 @@ const styles = StyleSheet.create({
   dayLabel: {
     flex: 1,
     textAlign: "center",
-    color: colors.textSecondary,
     fontSize: 11,
+    fontWeight: "700",
   },
   caption: {
     color: colors.text,
@@ -471,7 +615,6 @@ const styles = StyleSheet.create({
   },
   summaryShadow: {
     marginTop: 14,
-    shadowColor: colors.primary,
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.22,
     shadowRadius: 14,
@@ -482,13 +625,22 @@ const styles = StyleSheet.create({
     padding: 16,
     overflow: "hidden",
     borderWidth: 1,
-    backgroundColor: withAlpha(colors.primary, 0.12),
-    borderColor: withAlpha(colors.primary, 0.32),
   },
   summaryDate: {
     color: colors.text,
     fontSize: 16,
     fontWeight: "700",
+  },
+  summaryZone: {
+    marginTop: 6,
+    fontSize: 18,
+    fontWeight: "800",
+  },
+  summaryDetail: {
+    color: colors.textSecondary,
+    fontSize: 13,
+    fontWeight: "600",
+    marginTop: 2,
     marginBottom: 12,
   },
   summaryChips: {
@@ -507,10 +659,5 @@ const styles = StyleSheet.create({
   summaryChipText: {
     fontSize: 13,
     fontWeight: "700",
-  },
-  average: {
-    color: colors.textSecondary,
-    fontSize: 13,
-    marginTop: 12,
   },
 });
