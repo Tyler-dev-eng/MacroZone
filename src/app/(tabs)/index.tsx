@@ -1,4 +1,5 @@
 import HomeHeader from "@/components/HomeHeader";
+import KeyboardScrollView from "@/components/KeyboardScrollView";
 import MacroGrid from "@/components/MacroGrid";
 import RecentMeals from "@/components/RecentMeals";
 import SavedMealsList from "@/components/SavedMealsList";
@@ -23,7 +24,7 @@ import { useResetScrollOnFocus } from "@/hooks/useResetScrollOnFocus";
 import { globalStyles } from "@/styles/global";
 import { useFocusEffect } from "expo-router";
 import { useCallback, useState } from "react";
-import { Alert, ScrollView, Text } from "react-native";
+import { Alert, Text } from "react-native";
 
 export default function HomeScreen() {
   const scrollRef = useResetScrollOnFocus();
@@ -116,7 +117,7 @@ export default function HomeScreen() {
   );
 
   return (
-    <ScrollView ref={scrollRef} style={globalStyles.container}>
+    <KeyboardScrollView ref={scrollRef} style={globalStyles.container}>
       <Text style={globalStyles.title}>MacroZone</Text>
       <HomeHeader />
       <ZoneBanner meals={meals} targets={targets} />
@@ -143,6 +144,6 @@ export default function HomeScreen() {
           onToggleFavorite={handleToggleFavorite}
         />
       ) : null}
-    </ScrollView>
+    </KeyboardScrollView>
   );
 }

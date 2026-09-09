@@ -1,3 +1,4 @@
+import KeyboardScrollView from "@/components/KeyboardScrollView";
 import TrendChart from "@/components/TrendChart";
 import { getMeals, type Meal } from "@/storage/meals";
 import { DEFAULT_TARGETS, getTargets, type Targets } from "@/storage/targets";
@@ -5,7 +6,7 @@ import { useResetScrollOnFocus } from "@/hooks/useResetScrollOnFocus";
 import { colors, globalStyles } from "@/styles/global";
 import { useFocusEffect } from "expo-router";
 import { useCallback, useState } from "react";
-import { ScrollView, StyleSheet, Text } from "react-native";
+import { StyleSheet, Text } from "react-native";
 
 export default function TrendsScreen() {
   const scrollRef = useResetScrollOnFocus();
@@ -28,7 +29,7 @@ export default function TrendsScreen() {
   );
 
   return (
-    <ScrollView
+    <KeyboardScrollView
       ref={scrollRef}
       style={globalStyles.container}
       contentContainerStyle={styles.content}
@@ -36,7 +37,7 @@ export default function TrendsScreen() {
       <Text style={globalStyles.title}>Trends</Text>
       <Text style={styles.subtitle}>Daily totals vs your targets</Text>
       <TrendChart meals={meals} targets={targets} />
-    </ScrollView>
+    </KeyboardScrollView>
   );
 }
 
