@@ -1,4 +1,5 @@
 import MealItem from "@/components/MealItem";
+import MealsFilters from "@/components/MealsFilters";
 import {
   deleteAllMeals,
   deleteMeal,
@@ -12,9 +13,15 @@ import {
   toggleFavorite,
 } from "@/storage/savedMeals";
 import { colors, globalStyles } from "@/styles/global";
-import { formatHistoryDay } from "@/utils/dates";
+import {
+  daysAgo,
+  formatHistoryDay,
+  matchesDatePreset,
+  type DatePreset,
+} from "@/utils/dates";
+import { mealTypeLabel } from "@/utils/mealType";
 import { useFocusEffect, router } from "expo-router";
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import {
   Alert,
   ScrollView,
@@ -28,6 +35,10 @@ export default function MealsScreen() {
   const [meals, setMeals] = useState<Meal[]>([]);
   const [favoriteKeys, setFavoriteKeys] = useState<Set<string>>(new Set());
   const [loggingId, setLoggingId] = useState<string | null>(null);
+  const [query, setQuery] = useState("");
+  const [preset, setPreset] = useState<DatePreset>("all");
+  const [from, setFrom] = useState<Date | null>(null);
+  const [to, setTo] = useState<Date | null>(null);
 
   const loadMeals = async () => {
     const [data, saved] = await Promise.all([getMeals(), getSavedMeals()]);
@@ -82,14 +93,61 @@ export default function MealsScreen() {
     );
   };
 
+  const handlePresetChange = (next: DatePreset) => {
+    setPreset(next);
+    if (next === "custom") {
+      setFrom((current) => current ?? daysAgo(6));
+      setTo((current) => current ?? new Date());
+    }
+  };
+
+  const handleFromChange = (date: Date) => {
+    setFrom(date);
+    setTo((current) => (current && date > current ? date : current));
+  };
+
+  const handleToChange = (date: Date) => {
+    setTo(date);
+    setFrom((current) => (current && date < current ? date : current));
+  };
+
+  const clearFilters = () => {
+    setQuery("");
+    setPreset("all");
+    setFrom(null);
+    setTo(null);
+  };
+
+  const hasActiveFilters = query.trim().length > 0 || preset !== "all";
+
+  const filteredMeals = useMemo(() => {
+    const needle = query.trim().toLowerCase();
+    return meals.filter((meal) => {
+      if (needle) {
+        const haystack =
+          `${meal.name} ${mealTypeLabel(meal.mealType)}`.toLowerCase();
+        if (!haystack.includes(needle)) return false;
+      }
+      return matchesDatePreset(meal.createdAt, preset, from, to);
+    });
+  }, [meals, query, preset, from, to]);
+
   useFocusEffect(
     useCallback(() => {
       void loadMeals();
     }, []),
   );
 
+  const emptyMessage =
+    meals.length === 0
+      ? "No meals logged yet."
+      : "No meals match these filters.";
+
   return (
-    <ScrollView style={globalStyles.container}>
+    <ScrollView
+      style={globalStyles.container}
+      keyboardShouldPersistTaps="handled"
+    >
       <View style={globalStyles.header}>
         <Text style={globalStyles.title}>All Meals</Text>
         {meals.length > 0 ? (
@@ -98,14 +156,38 @@ export default function MealsScreen() {
           </TouchableOpacity>
         ) : null}
       </View>
+
+      {meals.length > 0 ? (
+        <MealsFilters
+          query={query}
+          onQueryChange={setQuery}
+          preset={preset}
+          onPresetChange={handlePresetChange}
+          from={from}
+          to={to}
+          onFromChange={handleFromChange}
+          onToChange={handleToChange}
+          onClear={clearFilters}
+          hasActiveFilters={hasActiveFilters}
+        />
+      ) : null}
+
       <View style={styles.list}>
-        {meals.length === 0 ? (
-          <Text style={globalStyles.empty}>No meals logged yet.</Text>
+        {hasActiveFilters && meals.length > 0 ? (
+          <Text style={styles.count}>
+            {filteredMeals.length}{" "}
+            {filteredMeals.length === 1 ? "meal" : "meals"}
+          </Text>
+        ) : null}
+        {filteredMeals.length === 0 ? (
+          <Text style={globalStyles.empty}>{emptyMessage}</Text>
         ) : (
-          meals.map((meal, index) => {
+          filteredMeals.map((meal, index) => {
             const dayLabel = formatHistoryDay(meal.createdAt);
             const previousLabel =
-              index > 0 ? formatHistoryDay(meals[index - 1].createdAt) : null;
+              index > 0
+                ? formatHistoryDay(filteredMeals[index - 1].createdAt)
+                : null;
             const showDay = dayLabel !== previousLabel;
 
             return (
@@ -152,7 +234,12 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   list: {
-    marginTop: 30,
+    marginTop: 20,
+  },
+  count: {
+    color: colors.textSecondary,
+    fontSize: 13,
+    marginBottom: 12,
   },
   day: {
     fontSize: 14,

@@ -18,6 +18,43 @@ export const startOfNextLocalDay = (date = new Date()): Date => {
   return next;
 };
 
+export const daysAgo = (count: number, from = new Date()): Date => {
+  const next = startOfLocalDay(from);
+  next.setDate(next.getDate() - count);
+  return next;
+};
+
+export type DatePreset = "all" | "today" | "yesterday" | "week" | "custom";
+
+/** Whether a meal timestamp falls in the selected local-date preset. */
+export const matchesDatePreset = (
+  isoDate: string,
+  preset: DatePreset,
+  from: Date | null,
+  to: Date | null,
+  now = new Date(),
+): boolean => {
+  const date = new Date(isoDate);
+
+  if (preset === "all") return true;
+
+  if (preset === "today") {
+    return localDayKey(date) === localDayKey(now);
+  }
+
+  if (preset === "yesterday") {
+    return localDayKey(date) === localDayKey(daysAgo(1, now));
+  }
+
+  if (preset === "week") {
+    return date >= daysAgo(6, now) && date < startOfNextLocalDay(now);
+  }
+
+  if (from && date < startOfLocalDay(from)) return false;
+  if (to && date >= startOfNextLocalDay(to)) return false;
+  return true;
+};
+
 /** Friendly label for a meal's local calendar day. */
 export const formatHistoryDay = (isoDate: string, now = new Date()): string => {
   const date = new Date(isoDate);

@@ -1,8 +1,6 @@
 import { colors } from "@/styles/global";
 import { formatLoggedAtDate, formatLoggedAtTime } from "@/utils/mealType";
-import DateTimePicker, {
-  type DateTimePickerEvent,
-} from "@react-native-community/datetimepicker";
+import DateTimePicker from "@react-native-community/datetimepicker";
 import { useState } from "react";
 import {
   Platform,
@@ -20,12 +18,8 @@ type LoggedAtFieldProps = {
 export default function LoggedAtField({ value, onChange }: LoggedAtFieldProps) {
   const [mode, setMode] = useState<"date" | "time" | null>(null);
 
-  const handleChange = (event: DateTimePickerEvent, selected?: Date) => {
-    if (Platform.OS === "android") {
-      setMode(null);
-      if (event.type !== "set" || !selected || !mode) return;
-    }
-    if (!selected || !mode) return;
+  const applySelected = (selected: Date) => {
+    if (!mode) return;
 
     const next = new Date(value);
     if (mode === "date") {
@@ -68,7 +62,11 @@ export default function LoggedAtField({ value, onChange }: LoggedAtFieldProps) {
           display={Platform.OS === "ios" ? "spinner" : "default"}
           themeVariant="dark"
           textColor={colors.text}
-          onChange={handleChange}
+          onValueChange={(_, selected) => {
+            if (Platform.OS === "android") setMode(null);
+            applySelected(selected);
+          }}
+          onDismiss={() => setMode(null)}
         />
       ) : null}
     </View>
