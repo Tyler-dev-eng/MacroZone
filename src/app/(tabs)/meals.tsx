@@ -19,6 +19,7 @@ import {
   matchesDatePreset,
   type DatePreset,
 } from "@/utils/dates";
+import { useResetScrollOnFocus } from "@/hooks/useResetScrollOnFocus";
 import { mealTypeLabel } from "@/utils/mealType";
 import { useFocusEffect, router } from "expo-router";
 import { useCallback, useMemo, useState } from "react";
@@ -32,6 +33,7 @@ import {
 } from "react-native";
 
 export default function MealsScreen() {
+  const scrollRef = useResetScrollOnFocus();
   const [meals, setMeals] = useState<Meal[]>([]);
   const [favoriteKeys, setFavoriteKeys] = useState<Set<string>>(new Set());
   const [loggingId, setLoggingId] = useState<string | null>(null);
@@ -145,6 +147,7 @@ export default function MealsScreen() {
 
   return (
     <ScrollView
+      ref={scrollRef}
       style={globalStyles.container}
       keyboardShouldPersistTaps="handled"
     >

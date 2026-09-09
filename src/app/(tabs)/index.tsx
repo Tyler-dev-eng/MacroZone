@@ -18,12 +18,14 @@ import {
   type SavedMeal,
 } from "@/storage/savedMeals";
 import { DEFAULT_TARGETS, getTargets, type Targets } from "@/storage/targets";
+import { useResetScrollOnFocus } from "@/hooks/useResetScrollOnFocus";
 import { globalStyles } from "@/styles/global";
 import { useFocusEffect } from "expo-router";
 import { useCallback, useState } from "react";
 import { Alert, ScrollView, Text } from "react-native";
 
 export default function HomeScreen() {
+  const scrollRef = useResetScrollOnFocus();
   const [meals, setMeals] = useState<Meal[]>([]);
   const [recentPastMeals, setRecentPastMeals] = useState<Meal[]>([]);
   const [savedMeals, setSavedMeals] = useState<SavedMeal[]>([]);
@@ -113,7 +115,7 @@ export default function HomeScreen() {
   );
 
   return (
-    <ScrollView style={globalStyles.container}>
+    <ScrollView ref={scrollRef} style={globalStyles.container}>
       <Text style={globalStyles.title}>MacroZone</Text>
       <HomeHeader />
       <MacroGrid meals={meals} targets={targets} />

@@ -3,6 +3,7 @@ import MealPhotoPicker from "@/components/MealPhotoPicker";
 import MealTypePicker from "@/components/MealTypePicker";
 import { getMeal, updateMeal, type Meal } from "@/storage/meals";
 import { findSavedMeal, toggleFavorite } from "@/storage/savedMeals";
+import { useResetScrollOnFocus } from "@/hooks/useResetScrollOnFocus";
 import { colors, globalStyles } from "@/styles/global";
 import { defaultMealType, isMealType, type MealType } from "@/utils/mealType";
 import { Ionicons } from "@expo/vector-icons";
@@ -24,6 +25,7 @@ const toNumber = (value: string) => {
 };
 
 export default function MealDetailsScreen() {
+  const scrollRef = useResetScrollOnFocus();
   const { id } = useLocalSearchParams<{ id: string }>();
   const mealId = Array.isArray(id) ? id[0] : id;
 
@@ -136,6 +138,7 @@ export default function MealDetailsScreen() {
 
   return (
     <ScrollView
+      ref={scrollRef}
       style={globalStyles.container}
       keyboardShouldPersistTaps="handled"
       contentContainerStyle={{ paddingBottom: 40 }}

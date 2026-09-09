@@ -1,12 +1,14 @@
 import TrendChart from "@/components/TrendChart";
 import { getMeals, type Meal } from "@/storage/meals";
 import { DEFAULT_TARGETS, getTargets, type Targets } from "@/storage/targets";
+import { useResetScrollOnFocus } from "@/hooks/useResetScrollOnFocus";
 import { colors, globalStyles } from "@/styles/global";
 import { useFocusEffect } from "expo-router";
 import { useCallback, useState } from "react";
 import { ScrollView, StyleSheet, Text } from "react-native";
 
 export default function TrendsScreen() {
+  const scrollRef = useResetScrollOnFocus();
   const [meals, setMeals] = useState<Meal[]>([]);
   const [targets, setTargets] = useState<Targets>(DEFAULT_TARGETS);
 
@@ -27,6 +29,7 @@ export default function TrendsScreen() {
 
   return (
     <ScrollView
+      ref={scrollRef}
       style={globalStyles.container}
       contentContainerStyle={styles.content}
     >

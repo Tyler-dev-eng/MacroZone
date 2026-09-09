@@ -9,6 +9,7 @@ import {
   saveMealAsFavorite,
   type SavedMeal,
 } from "@/storage/savedMeals";
+import { useResetScrollOnFocus } from "@/hooks/useResetScrollOnFocus";
 import { colors, globalStyles } from "@/styles/global";
 import { defaultMealType, isMealType, type MealType } from "@/utils/mealType";
 import { useFocusEffect, router } from "expo-router";
@@ -29,6 +30,7 @@ const toNumber = (value: string) => {
 };
 
 export default function AddMealScreen() {
+  const scrollRef = useResetScrollOnFocus();
   const [name, setName] = useState("");
   const [calories, setCalories] = useState("");
   const [protein, setProtein] = useState("");
@@ -129,6 +131,7 @@ export default function AddMealScreen() {
 
   return (
     <ScrollView
+      ref={scrollRef}
       style={globalStyles.container}
       keyboardShouldPersistTaps="handled"
       contentContainerStyle={{ paddingBottom: 40 }}
