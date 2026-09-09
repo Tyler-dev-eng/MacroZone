@@ -26,6 +26,7 @@ export default function MacroGrid({ meals, targets }: MacroGridProps) {
         current={totals.calories}
         target={targets.calories}
         color="#ff6b6b"
+        icon="flame"
       />
       <MacroCard
         label="Protein"
@@ -33,6 +34,7 @@ export default function MacroGrid({ meals, targets }: MacroGridProps) {
         target={targets.protein}
         unit="g"
         color="#4ecdc4"
+        icon="barbell"
       />
       <MacroCard
         label="Carbs"
@@ -40,6 +42,7 @@ export default function MacroGrid({ meals, targets }: MacroGridProps) {
         target={targets.carbs}
         unit="g"
         color="#ffd93d"
+        icon="nutrition"
       />
       <MacroCard
         label="Fat"
@@ -47,6 +50,7 @@ export default function MacroGrid({ meals, targets }: MacroGridProps) {
         target={targets.fat}
         unit="g"
         color="#6bcb77"
+        icon="water"
       />
     </View>
   );
@@ -56,6 +60,6 @@ const styles = StyleSheet.create({
   grid: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: 12,
+    gap: 14,
   },
 });
