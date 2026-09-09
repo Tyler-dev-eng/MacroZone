@@ -42,7 +42,7 @@ export default function MealTypePicker({
           >
             <Ionicons
               name={meta.icon}
-              size={14}
+              size={18}
               color={selected ? colors.background : meta.color}
             />
             <Text
@@ -50,6 +50,7 @@ export default function MealTypePicker({
                 styles.chipText,
                 { color: selected ? colors.background : meta.color },
               ]}
+              numberOfLines={1}
             >
               {mealTypeLabel(type)}
             </Text>
@@ -63,25 +64,23 @@ export default function MealTypePicker({
 const styles = StyleSheet.create({
   wrap: {
     flexDirection: "row",
-    flexWrap: "wrap",
     gap: 8,
     marginTop: 16,
   },
   chip: {
-    flexGrow: 1,
-    flexBasis: "22%",
-    minHeight: 44,
+    flex: 1,
+    minHeight: 72,
     paddingVertical: 10,
-    paddingHorizontal: 8,
-    borderRadius: 12,
+    paddingHorizontal: 4,
+    borderRadius: 14,
     borderWidth: 1,
     alignItems: "center",
     justifyContent: "center",
-    flexDirection: "row",
     gap: 6,
   },
   chipText: {
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: "800",
+    textAlign: "center",
   },
 });
