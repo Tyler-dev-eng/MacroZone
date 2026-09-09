@@ -2,6 +2,7 @@ import { db } from "@/db";
 import { useMigrations } from "drizzle-orm/expo-sqlite/migrator";
 import { Stack } from "expo-router";
 import { Text, View } from "react-native";
+import { KeyboardProvider } from "react-native-keyboard-controller";
 import migrations from "../../drizzle/migrations";
 
 export default function RootLayout() {
@@ -22,9 +23,15 @@ export default function RootLayout() {
   }
 
   return (
-    <Stack screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="(tabs)" />
-      <Stack.Screen name="meal/[id]" />
-    </Stack>
+    <KeyboardProvider
+      statusBarTranslucent
+      navigationBarTranslucent
+      preserveEdgeToEdge
+    >
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="(tabs)" />
+        <Stack.Screen name="meal/[id]" />
+      </Stack>
+    </KeyboardProvider>
   );
 }

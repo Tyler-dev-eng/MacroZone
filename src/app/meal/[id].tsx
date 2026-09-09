@@ -1,3 +1,4 @@
+import KeyboardScrollView from "@/components/KeyboardScrollView";
 import LoggedAtField from "@/components/LoggedAtField";
 import MealPhotoPicker from "@/components/MealPhotoPicker";
 import MealTypePicker from "@/components/MealTypePicker";
@@ -11,7 +12,6 @@ import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
 import {
   Alert,
-  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -137,11 +137,10 @@ export default function MealDetailsScreen() {
   }
 
   return (
-    <ScrollView
+    <KeyboardScrollView
       ref={scrollRef}
       style={globalStyles.container}
-      keyboardShouldPersistTaps="handled"
-      contentContainerStyle={{ paddingBottom: 40 }}
+      contentContainerStyle={styles.content}
     >
       <TouchableOpacity style={styles.back} onPress={() => router.back()}>
         <Ionicons name="chevron-back" size={22} color={colors.primary} />
@@ -224,11 +223,14 @@ export default function MealDetailsScreen() {
           {saving ? "Saving..." : "Save changes"}
         </Text>
       </TouchableOpacity>
-    </ScrollView>
+    </KeyboardScrollView>
   );
 }
 
 const styles = StyleSheet.create({
+  content: {
+    paddingBottom: 40,
+  },
   back: {
     flexDirection: "row",
     alignItems: "center",

@@ -1,3 +1,4 @@
+import KeyboardScrollView from "@/components/KeyboardScrollView";
 import MealItem from "@/components/MealItem";
 import MealsFilters from "@/components/MealsFilters";
 import {
@@ -23,14 +24,7 @@ import { useResetScrollOnFocus } from "@/hooks/useResetScrollOnFocus";
 import { mealTypeLabel } from "@/utils/mealType";
 import { useFocusEffect, router } from "expo-router";
 import { useCallback, useMemo, useState } from "react";
-import {
-  Alert,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { Alert, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 export default function MealsScreen() {
   const scrollRef = useResetScrollOnFocus();
@@ -146,11 +140,7 @@ export default function MealsScreen() {
       : "No meals match these filters.";
 
   return (
-    <ScrollView
-      ref={scrollRef}
-      style={globalStyles.container}
-      keyboardShouldPersistTaps="handled"
-    >
+    <KeyboardScrollView ref={scrollRef} style={globalStyles.container}>
       <View style={globalStyles.header}>
         <Text style={globalStyles.title}>All Meals</Text>
         {meals.length > 0 ? (
@@ -227,7 +217,7 @@ export default function MealsScreen() {
           })
         )}
       </View>
-    </ScrollView>
+    </KeyboardScrollView>
   );
 }
 

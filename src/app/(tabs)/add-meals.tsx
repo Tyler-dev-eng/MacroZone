@@ -1,3 +1,4 @@
+import KeyboardScrollView from "@/components/KeyboardScrollView";
 import LoggedAtField from "@/components/LoggedAtField";
 import MealPhotoPicker from "@/components/MealPhotoPicker";
 import MealTypePicker from "@/components/MealTypePicker";
@@ -16,7 +17,6 @@ import { useFocusEffect, router } from "expo-router";
 import { useCallback, useState } from "react";
 import {
   Alert,
-  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -130,11 +130,10 @@ export default function AddMealScreen() {
   };
 
   return (
-    <ScrollView
+    <KeyboardScrollView
       ref={scrollRef}
       style={globalStyles.container}
-      keyboardShouldPersistTaps="handled"
-      contentContainerStyle={{ paddingBottom: 40 }}
+      contentContainerStyle={styles.content}
     >
       <Text style={globalStyles.title}>Add Meal</Text>
 
@@ -215,11 +214,14 @@ export default function AddMealScreen() {
           {saving ? "Adding..." : "Add Meal"}
         </Text>
       </TouchableOpacity>
-    </ScrollView>
+    </KeyboardScrollView>
   );
 }
 
 const styles = StyleSheet.create({
+  content: {
+    paddingBottom: 40,
+  },
   input: {
     backgroundColor: colors.surface,
     color: colors.text,

@@ -1,3 +1,4 @@
+import KeyboardScrollView from "@/components/KeyboardScrollView";
 import { DEFAULT_TARGETS, getTargets, saveTargets } from "@/storage/targets";
 import { colors, globalStyles } from "@/styles/global";
 import { useFocusEffect } from "expo-router";
@@ -92,7 +93,10 @@ export default function SettingsScreen() {
   };
 
   return (
-    <View style={globalStyles.container}>
+    <KeyboardScrollView
+      style={globalStyles.container}
+      contentContainerStyle={styles.content}
+    >
       <Text style={globalStyles.title}>Settings</Text>
       <Text style={globalStyles.sectionTitle}>Daily targets</Text>
       <Text style={styles.hint}>These goals show on the home screen.</Text>
@@ -154,11 +158,14 @@ export default function SettingsScreen() {
           </TouchableOpacity>
         </>
       )}
-    </View>
+    </KeyboardScrollView>
   );
 }
 
 const styles = StyleSheet.create({
+  content: {
+    paddingBottom: 40,
+  },
   hint: {
     color: colors.textSecondary,
     fontSize: 14,
