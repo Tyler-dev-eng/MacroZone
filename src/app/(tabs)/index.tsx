@@ -123,18 +123,18 @@ export default function HomeScreen() {
       <HomeHeader />
       <ZoneBanner meals={meals} targets={targets} />
       <MacroGrid meals={meals} targets={targets} />
+      <SavedMealsList
+        meals={savedMeals}
+        hint="Tap to log today"
+        onPress={handleLogSaved}
+        onRemove={handleRemoveSaved}
+      />
       <DayTimeline
         meals={meals}
         favoriteKeys={favoriteKeys}
         onLogAgain={handleLogAgain}
         onToggleFavorite={handleToggleFavorite}
         onDeleteMeal={handleDeleteMeal}
-      />
-      <SavedMealsList
-        meals={savedMeals}
-        hint="Tap to log today"
-        onPress={handleLogSaved}
-        onRemove={handleRemoveSaved}
       />
       {recentPastMeals.length > 0 ? (
         <RecentMeals
