@@ -175,35 +175,6 @@ Migrations run automatically on app launch via `useMigrations` in `src/app/_layo
 
 Meal photos are stored as local file URIs on device.
 
-## Screenshot checklist
-
-All screenshots live in `docs/screenshots/`.
-
-### Captured
-
-| Filename | Screen |
-| --- | --- |
-| `home_screen_empty.png` | Home — Start your day card |
-| `home_macros_close_only.png` | Home — Close banner, macro grid, What fits |
-| `home_today_meals_only.png` | Home — Favorites, today timeline, meal detail |
-| `add_meal_empty.png` | Add Meal — blank form |
-| `breakfast_meal.png` | Add Meal — filled form with photo |
-| `all_meals_empty.png` | All Meals — no history |
-| `all_meals_list_only.png` | All Meals — search, filters, meal list |
-| `trends_empty.png` | Trends — no data |
-| `trends_fat_only.png` | Trends — charts, day summary, meal mix |
-| `settings.png` | Settings — daily targets |
-| `saved_dialog.png` | Settings — saved confirmation dialog |
-
-### Optional extras
-
-| Filename | What to capture |
-| --- | --- |
-| `home_in_zone.png` | Green **In the zone** banner (all macros ≥ 90%, none over) |
-| `all_meals_filters.png` | Search or date filter actively applied |
-| `meal_detail.png` | Meal edit screen from All Meals |
-| `device_frame.png` | Hero shot in a device bezel for the README header |
-
 ## License
 
 See [LICENSE](LICENSE).
