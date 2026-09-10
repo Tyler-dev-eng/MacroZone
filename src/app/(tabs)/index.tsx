@@ -5,6 +5,7 @@ import MacroGrid from "@/components/MacroGrid";
 import RecentMeals from "@/components/RecentMeals";
 import SavedMealsList from "@/components/SavedMealsList";
 import StartDayCard from "@/components/StartDayCard";
+import WhatFitsCue from "@/components/WhatFitsCue";
 import ZoneBanner from "@/components/ZoneBanner";
 import {
   deleteMeal,
@@ -128,6 +129,12 @@ export default function HomeScreen() {
         <>
           <ZoneBanner meals={meals} targets={targets} />
           <MacroGrid meals={meals} targets={targets} />
+          <WhatFitsCue
+            meals={meals}
+            targets={targets}
+            favorites={savedMeals}
+            recents={recentPastMeals}
+          />
         </>
       )}
       <SavedMealsList
