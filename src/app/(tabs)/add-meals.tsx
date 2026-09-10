@@ -1,3 +1,4 @@
+import { useDialog } from "@/components/AppDialog";
 import KeyboardScrollView from "@/components/KeyboardScrollView";
 import LoggedAtField from "@/components/LoggedAtField";
 import MealPhotoPicker from "@/components/MealPhotoPicker";
@@ -21,7 +22,6 @@ import {
 import { useFocusEffect, router, useLocalSearchParams } from "expo-router";
 import { useCallback, useState } from "react";
 import {
-  Alert,
   StyleSheet,
   Text,
   TextInput,
@@ -35,6 +35,7 @@ const toNumber = (value: string) => {
 };
 
 export default function AddMealScreen() {
+  const dialog = useDialog();
   const scrollRef = useResetScrollOnFocus();
   const params = useLocalSearchParams<{ type?: string | string[] }>();
   const typeParam = Array.isArray(params.type) ? params.type[0] : params.type;
@@ -84,7 +85,7 @@ export default function AddMealScreen() {
       await deleteSavedMeal(id);
       await loadSavedMeals();
     } catch {
-      Alert.alert(
+      dialog.notice(
         "Couldn't update favorite",
         "Something went wrong. Try again.",
       );
@@ -98,7 +99,7 @@ export default function AddMealScreen() {
     const parsedCalories = toNumber(calories);
 
     if (!trimmedName || parsedCalories === null) {
-      Alert.alert("Missing info", "Please enter a meal name and calories.");
+      dialog.notice("Missing info", "Please enter a meal name and calories.");
       return;
     }
 
@@ -118,7 +119,7 @@ export default function AddMealScreen() {
         await saveMealAsFavorite(created);
       }
     } catch {
-      Alert.alert("Couldn't save", "Something went wrong. Try again.");
+      dialog.notice("Couldn't save", "Something went wrong. Try again.");
       return;
     } finally {
       setSaving(false);

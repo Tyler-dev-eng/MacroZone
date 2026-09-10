@@ -1,3 +1,4 @@
+import { useDialog } from "@/components/AppDialog";
 import MealTypeBadge from "@/components/MealTypeBadge";
 import { colors } from "@/styles/global";
 import { withAlpha } from "@/utils/color";
@@ -8,7 +9,7 @@ import {
 } from "@/utils/mealType";
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
-import { Alert, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 type MealItemProps = {
   name: string;
@@ -41,15 +42,19 @@ export default function MealItem({
   onToggleFavorite,
   onDelete,
 }: MealItemProps) {
+  const dialog = useDialog();
   const type = mealType ? normalizeMealType(mealType) : null;
   const meta = type ? MEAL_TYPE_META[type] : null;
 
   const confirmDelete = () => {
     if (!onDelete) return;
-    Alert.alert("Delete meal?", `"${name}" will be removed.`, [
-      { text: "Cancel", style: "cancel" },
-      { text: "Delete", style: "destructive", onPress: onDelete },
-    ]);
+    dialog.confirm({
+      title: "Delete meal?",
+      message: `“${name}” will be removed.`,
+      confirmLabel: "Delete",
+      destructive: true,
+      onConfirm: onDelete,
+    });
   };
 
   return (

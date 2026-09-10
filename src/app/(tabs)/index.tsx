@@ -1,3 +1,4 @@
+import { useDialog } from "@/components/AppDialog";
 import DayTimeline from "@/components/DayTimeline";
 import HomeHeader from "@/components/HomeHeader";
 import KeyboardScrollView from "@/components/KeyboardScrollView";
@@ -27,9 +28,10 @@ import { useResetScrollOnFocus } from "@/hooks/useResetScrollOnFocus";
 import { globalStyles } from "@/styles/global";
 import { useFocusEffect } from "expo-router";
 import { useCallback, useState } from "react";
-import { Alert, Text } from "react-native";
+import { Text } from "react-native";
 
 export default function HomeScreen() {
+  const dialog = useDialog();
   const scrollRef = useResetScrollOnFocus();
   const [meals, setMeals] = useState<Meal[]>([]);
   const [recentPastMeals, setRecentPastMeals] = useState<Meal[]>([]);
@@ -69,7 +71,7 @@ export default function HomeScreen() {
       await logMealAgain(id);
       await fetchHomeData();
     } catch {
-      Alert.alert("Couldn't log", "Something went wrong. Try again.");
+      dialog.notice("Couldn't log", "Something went wrong. Try again.");
     } finally {
       setLoggingId(null);
     }
@@ -83,7 +85,7 @@ export default function HomeScreen() {
       await logSavedMeal(saved.id);
       await fetchHomeData();
     } catch {
-      Alert.alert("Couldn't log", "Something went wrong. Try again.");
+      dialog.notice("Couldn't log", "Something went wrong. Try again.");
     } finally {
       setLoggingId(null);
     }
@@ -94,7 +96,7 @@ export default function HomeScreen() {
       await toggleFavorite(meal);
       await fetchHomeData();
     } catch {
-      Alert.alert(
+      dialog.notice(
         "Couldn't update favorite",
         "Something went wrong. Try again.",
       );
@@ -106,7 +108,7 @@ export default function HomeScreen() {
       await deleteSavedMeal(id);
       await fetchHomeData();
     } catch {
-      Alert.alert(
+      dialog.notice(
         "Couldn't update favorite",
         "Something went wrong. Try again.",
       );

@@ -1,3 +1,4 @@
+import { useDialog } from "@/components/AppDialog";
 import { type Meal } from "@/storage/meals";
 import { mealFingerprint } from "@/storage/savedMeals";
 import { colors, globalStyles } from "@/styles/global";
@@ -15,7 +16,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { router } from "expo-router";
 import { useMemo, useState } from "react";
-import { Alert, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 const PHOTO_SIZE = 68;
 
@@ -232,14 +233,18 @@ function TimelineMealCard({
   onToggleFavorite: () => void;
   onDelete: () => void;
 }) {
+  const dialog = useDialog();
   const type = normalizeMealType(meal.mealType);
   const meta = MEAL_TYPE_META[type];
 
   const confirmDelete = () => {
-    Alert.alert("Delete meal?", `"${meal.name}" will be removed.`, [
-      { text: "Cancel", style: "cancel" },
-      { text: "Delete", style: "destructive", onPress: onDelete },
-    ]);
+    dialog.confirm({
+      title: "Delete meal?",
+      message: `“${meal.name}” will be removed.`,
+      confirmLabel: "Delete",
+      destructive: true,
+      onConfirm: onDelete,
+    });
   };
 
   return (

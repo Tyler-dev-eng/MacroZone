@@ -1,9 +1,10 @@
+import { useDialog } from "@/components/AppDialog";
 import { colors } from "@/styles/global";
 import { Ionicons } from "@expo/vector-icons";
 import * as DocumentPicker from "expo-document-picker";
 import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
-import { Alert, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 type MealPhotoPickerProps = {
   uri: string | null;
@@ -21,10 +22,11 @@ export default function MealPhotoPicker({
   uri,
   onChange,
 }: MealPhotoPickerProps) {
+  const dialog = useDialog();
   const takePhoto = async () => {
     const permission = await ImagePicker.requestCameraPermissionsAsync();
     if (!permission.granted) {
-      Alert.alert(
+      dialog.notice(
         "Permission required",
         "Camera access is needed to photograph a meal.",
       );
@@ -37,7 +39,7 @@ export default function MealPhotoPicker({
         onChange(result.assets[0].uri);
       }
     } catch {
-      Alert.alert(
+      dialog.notice(
         "Couldn't open camera",
         "Try a physical device, or choose a file instead.",
       );
@@ -47,7 +49,7 @@ export default function MealPhotoPicker({
   const pickFromLibrary = async () => {
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!permission.granted) {
-      Alert.alert(
+      dialog.notice(
         "Permission required",
         "Photo library access is needed to attach a meal photo.",
       );
@@ -60,7 +62,7 @@ export default function MealPhotoPicker({
         onChange(result.assets[0].uri);
       }
     } catch {
-      Alert.alert("Couldn't open photos", "Something went wrong. Try again.");
+      dialog.notice("Couldn't open photos", "Something went wrong. Try again.");
     }
   };
 
@@ -76,16 +78,18 @@ export default function MealPhotoPicker({
         onChange(result.assets[0].uri);
       }
     } catch {
-      Alert.alert("Couldn't open files", "Something went wrong. Try again.");
+      dialog.notice("Couldn't open files", "Something went wrong. Try again.");
     }
   };
 
   const chooseFile = () => {
-    Alert.alert("Choose a photo", undefined, [
-      { text: "Photo library", onPress: () => void pickFromLibrary() },
-      { text: "Files", onPress: () => void pickFromFiles() },
-      { text: "Cancel", style: "cancel" },
-    ]);
+    dialog.choose({
+      title: "Choose a photo",
+      options: [
+        { label: "Photo library", onPress: () => void pickFromLibrary() },
+        { label: "Files", onPress: () => void pickFromFiles() },
+      ],
+    });
   };
 
   return (

@@ -1,4 +1,5 @@
 import { db } from "@/db";
+import { DialogProvider } from "@/components/AppDialog";
 import { useMigrations } from "drizzle-orm/expo-sqlite/migrator";
 import { Stack } from "expo-router";
 import { Text, View } from "react-native";
@@ -28,10 +29,12 @@ export default function RootLayout() {
       navigationBarTranslucent
       preserveEdgeToEdge
     >
-      <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="(tabs)" />
-        <Stack.Screen name="meal/[id]" />
-      </Stack>
+      <DialogProvider>
+        <Stack screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="(tabs)" />
+          <Stack.Screen name="meal/[id]" />
+        </Stack>
+      </DialogProvider>
     </KeyboardProvider>
   );
 }

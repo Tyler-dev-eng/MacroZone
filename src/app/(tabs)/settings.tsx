@@ -1,10 +1,10 @@
+import { useDialog } from "@/components/AppDialog";
 import KeyboardScrollView from "@/components/KeyboardScrollView";
 import { DEFAULT_TARGETS, getTargets, saveTargets } from "@/storage/targets";
 import { colors, globalStyles } from "@/styles/global";
 import { useFocusEffect } from "expo-router";
 import { useCallback, useState } from "react";
 import {
-  Alert,
   StyleSheet,
   Text,
   TextInput,
@@ -18,6 +18,7 @@ const toNumber = (value: string) => {
 };
 
 export default function SettingsScreen() {
+  const dialog = useDialog();
   const [calories, setCalories] = useState(String(DEFAULT_TARGETS.calories));
   const [protein, setProtein] = useState(String(DEFAULT_TARGETS.protein));
   const [carbs, setCarbs] = useState(String(DEFAULT_TARGETS.carbs));
@@ -25,7 +26,7 @@ export default function SettingsScreen() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
-  const loadTargets = async () => {
+  const loadTargets = useCallback(async () => {
     try {
       const saved = await getTargets();
       setCalories(String(saved.calories));
@@ -33,16 +34,16 @@ export default function SettingsScreen() {
       setCarbs(String(saved.carbs));
       setFat(String(saved.fat));
     } catch {
-      Alert.alert("Couldn't load", "Something went wrong. Try again.");
+      dialog.notice("Couldn't load", "Something went wrong. Try again.");
     } finally {
       setLoading(false);
     }
-  };
+  }, [dialog]);
 
   useFocusEffect(
     useCallback(() => {
       void loadTargets();
-    }, []),
+    }, [loadTargets]),
   );
 
   const handleSave = async () => {
@@ -59,7 +60,7 @@ export default function SettingsScreen() {
       parsedCarbs === null ||
       parsedFat === null
     ) {
-      Alert.alert(
+      dialog.notice(
         "Missing info",
         "Please enter a number for calories, protein, carbs, and fat.",
       );
@@ -72,7 +73,7 @@ export default function SettingsScreen() {
       parsedCarbs < 0 ||
       parsedFat < 0
     ) {
-      Alert.alert("Invalid targets", "Targets can't be negative.");
+      dialog.notice("Invalid targets", "Targets can't be negative.");
       return;
     }
 
@@ -84,9 +85,13 @@ export default function SettingsScreen() {
         carbs: parsedCarbs,
         fat: parsedFat,
       });
-      Alert.alert("Saved", "Your daily targets have been updated.");
+      dialog.notice(
+        "Saved",
+        "Your daily targets have been updated.",
+        "success",
+      );
     } catch {
-      Alert.alert("Couldn't save", "Something went wrong. Try again.");
+      dialog.notice("Couldn't save", "Something went wrong. Try again.");
     } finally {
       setSaving(false);
     }

@@ -1,3 +1,4 @@
+import { useDialog } from "@/components/AppDialog";
 import KeyboardScrollView from "@/components/KeyboardScrollView";
 import MealItem from "@/components/MealItem";
 import MealsEmpty from "@/components/MealsEmpty";
@@ -25,9 +26,10 @@ import { useResetScrollOnFocus } from "@/hooks/useResetScrollOnFocus";
 import { mealTypeLabel } from "@/utils/mealType";
 import { useFocusEffect, router } from "expo-router";
 import { useCallback, useMemo, useState } from "react";
-import { Alert, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 export default function MealsScreen() {
+  const dialog = useDialog();
   const scrollRef = useResetScrollOnFocus();
   const [meals, setMeals] = useState<Meal[]>([]);
   const [ready, setReady] = useState(false);
@@ -58,7 +60,7 @@ export default function MealsScreen() {
       await logMealAgain(id);
       await loadMeals();
     } catch {
-      Alert.alert("Couldn't log", "Something went wrong. Try again.");
+      dialog.notice("Couldn't log", "Something went wrong. Try again.");
     } finally {
       setLoggingId(null);
     }
@@ -69,7 +71,7 @@ export default function MealsScreen() {
       await toggleFavorite(meal);
       await loadMeals();
     } catch {
-      Alert.alert(
+      dialog.notice(
         "Couldn't update favorite",
         "Something went wrong. Try again.",
       );
@@ -82,14 +84,14 @@ export default function MealsScreen() {
   };
 
   const confirmClear = () => {
-    Alert.alert(
-      "Delete all meal history?",
-      "This removes every logged meal, including past days. This can't be undone.",
-      [
-        { text: "Cancel", style: "cancel" },
-        { text: "Delete all", style: "destructive", onPress: handleClearAll },
-      ],
-    );
+    dialog.confirm({
+      title: "Delete all meal history?",
+      message:
+        "This removes every logged meal, including past days. This can't be undone.",
+      confirmLabel: "Delete all",
+      destructive: true,
+      onConfirm: () => void handleClearAll(),
+    });
   };
 
   const handlePresetChange = (next: DatePreset) => {

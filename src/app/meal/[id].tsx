@@ -1,3 +1,4 @@
+import { useDialog } from "@/components/AppDialog";
 import MealTypeBadge from "@/components/MealTypeBadge";
 import KeyboardScrollView from "@/components/KeyboardScrollView";
 import LoggedAtField from "@/components/LoggedAtField";
@@ -17,7 +18,6 @@ import { Ionicons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
 import {
-  Alert,
   StyleSheet,
   Text,
   TextInput,
@@ -31,6 +31,7 @@ const toNumber = (value: string) => {
 };
 
 export default function MealDetailsScreen() {
+  const dialog = useDialog();
   const scrollRef = useResetScrollOnFocus();
   const { id } = useLocalSearchParams<{ id: string }>();
   const mealId = Array.isArray(id) ? id[0] : id;
@@ -75,7 +76,7 @@ export default function MealDetailsScreen() {
     const parsedCalories = toNumber(calories);
 
     if (!trimmedName || parsedCalories === null) {
-      Alert.alert("Missing info", "Please enter a meal name and calories.");
+      dialog.notice("Missing info", "Please enter a meal name and calories.");
       return;
     }
 
@@ -94,7 +95,7 @@ export default function MealDetailsScreen() {
       });
       router.back();
     } catch {
-      Alert.alert("Couldn't save", "Something went wrong. Try again.");
+      dialog.notice("Couldn't save", "Something went wrong. Try again.");
     } finally {
       setSaving(false);
     }
@@ -115,7 +116,7 @@ export default function MealDetailsScreen() {
       });
       setIsFavorite(next);
     } catch {
-      Alert.alert(
+      dialog.notice(
         "Couldn't update favorite",
         "Something went wrong. Try again.",
       );
