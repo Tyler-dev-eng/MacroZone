@@ -1,14 +1,8 @@
+import { useCountUp } from "@/hooks/useCountUp";
 import { colors } from "@/styles/global";
 import { withAlpha } from "@/utils/color";
 import { Ionicons } from "@expo/vector-icons";
-import { useEffect } from "react";
 import { StyleSheet, Text, View } from "react-native";
-import Animated, {
-  Easing,
-  useAnimatedStyle,
-  useSharedValue,
-  withTiming,
-} from "react-native-reanimated";
 
 type MacroCardProps = {
   label: string;
@@ -38,38 +32,30 @@ export default function MacroCard({
   color,
   icon,
 }: MacroCardProps) {
-  const remaining = target - current;
+  const displayed = useCountUp(current);
+  const remaining = target - displayed;
   const isOver = remaining < 0;
   const progress =
-    target <= 0 ? (current > 0 ? 1 : 0) : Math.min(current / target, 1);
+    target <= 0 ? (displayed > 0 ? 1 : 0) : Math.min(displayed / target, 1);
   const percent =
     target <= 0
-      ? current > 0
+      ? displayed > 0
         ? 100
         : 0
-      : Math.round((current / target) * 100);
+      : Math.round((displayed / target) * 100);
   const fillColor = isOver ? colors.alert : color;
   const remainingLabel = isOver
     ? `${formatAmount(remaining, unit)} over`
     : `${formatAmount(remaining, unit)} left`;
-
-  const fillWidth = useSharedValue(0);
-
-  useEffect(() => {
-    fillWidth.value = withTiming(progress, {
-      duration: 700,
-      easing: Easing.out(Easing.cubic),
-    });
-  }, [fillWidth, progress]);
-
-  const fillStyle = useAnimatedStyle(() => ({
-    width: `${fillWidth.value * 100}%`,
-  }));
+  const a11yRemaining =
+    target - current < 0
+      ? `${formatAmount(target - current, unit)} over`
+      : `${formatAmount(target - current, unit)} left`;
 
   return (
     <View
       style={[styles.shadow, { shadowColor: color }]}
-      accessibilityLabel={`${label} ${formatAmount(current, unit)} of ${formatAmount(target, unit)}, ${remainingLabel}`}
+      accessibilityLabel={`${label} ${formatAmount(current, unit)} of ${formatAmount(target, unit)}, ${a11yRemaining}`}
     >
       <View
         style={[
@@ -111,7 +97,7 @@ export default function MacroCard({
           </View>
         </View>
 
-        <Text style={styles.value}>{formatAmount(current, unit)}</Text>
+        <Text style={styles.value}>{formatAmount(displayed, unit)}</Text>
         <Text style={styles.goal}>of {formatAmount(target, unit)}</Text>
 
         <View
@@ -134,8 +120,14 @@ export default function MacroCard({
             now: Math.min(percent, 100),
           }}
         >
-          <Animated.View
-            style={[styles.fill, { backgroundColor: fillColor }, fillStyle]}
+          <View
+            style={[
+              styles.fill,
+              {
+                backgroundColor: fillColor,
+                width: `${progress * 100}%`,
+              },
+            ]}
           />
         </View>
       </View>

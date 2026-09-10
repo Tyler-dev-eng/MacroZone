@@ -4,6 +4,7 @@ import { db } from "@/db";
 import { meals, type Meal, type NewMeal } from "@/db/schema";
 import { deleteMealImageFile, persistMealImage } from "@/storage/mealImages";
 import { startOfLocalDay, startOfNextLocalDay } from "@/utils/dates";
+import { lightImpact } from "@/utils/haptics";
 import { desc, eq, and, gte, lt } from "drizzle-orm";
 
 export type { Meal, NewMeal };
@@ -44,6 +45,7 @@ export const addMeal = async (meal: NewMeal): Promise<Meal> => {
   };
 
   await db.insert(meals).values(newMeal);
+  lightImpact();
   return newMeal;
 };
 
