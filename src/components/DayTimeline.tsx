@@ -290,8 +290,8 @@ function TimelineMealCard({
               {formatLoggedAtTime(meal.createdAt)}
             </Text>
             <Text style={styles.cardMacros} numberOfLines={1}>
-              {meal.calories} cal · {meal.protein}P · {meal.carbs}C · {meal.fat}
-              F
+              {meal.calories} cal · {meal.protein}P · {meal.carbs}C ·{" "}
+              {meal.fat}F
             </Text>
           </View>
         </TouchableOpacity>
@@ -484,7 +484,9 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
   },
   cardActions: {
-    gap: 12,
+    flexDirection: "row",
     alignItems: "center",
+    gap: 6,
+    flexShrink: 0,
   },
 });
