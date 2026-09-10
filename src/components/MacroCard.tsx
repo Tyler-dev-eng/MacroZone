@@ -2,7 +2,8 @@ import { useCountUp } from "@/hooks/useCountUp";
 import { colors } from "@/styles/global";
 import { withAlpha } from "@/utils/color";
 import { Ionicons } from "@expo/vector-icons";
-import { StyleSheet, Text, View } from "react-native";
+import { useEffect, useState } from "react";
+import { Animated, StyleSheet, Text, View } from "react-native";
 
 type MacroCardProps = {
   label: string;
@@ -11,6 +12,7 @@ type MacroCardProps = {
   unit?: string;
   color: string;
   icon: keyof typeof Ionicons.glyphMap;
+  glowAt?: number;
 };
 
 const formatAmount = (value: number, unit: string): string => {
@@ -31,8 +33,29 @@ export default function MacroCard({
   unit = "",
   color,
   icon,
+  glowAt = 0,
 }: MacroCardProps) {
   const displayed = useCountUp(current);
+  const [pulse] = useState(() => new Animated.Value(0));
+
+  useEffect(() => {
+    if (!glowAt) return;
+    pulse.setValue(0);
+    const anim = Animated.sequence([
+      Animated.timing(pulse, {
+        toValue: 1,
+        duration: 220,
+        useNativeDriver: false,
+      }),
+      Animated.timing(pulse, {
+        toValue: 0,
+        duration: 880,
+        useNativeDriver: false,
+      }),
+    ]);
+    anim.start();
+    return () => anim.stop();
+  }, [glowAt, pulse]);
   const remaining = target - displayed;
   const isOver = remaining < 0;
   const progress =
@@ -53,8 +76,25 @@ export default function MacroCard({
       : `${formatAmount(target - current, unit)} left`;
 
   return (
-    <View
-      style={[styles.shadow, { shadowColor: color }]}
+    <Animated.View
+      style={[
+        styles.shadow,
+        {
+          shadowColor: color,
+          shadowOpacity: pulse.interpolate({
+            inputRange: [0, 1],
+            outputRange: [0.32, 1],
+          }),
+          shadowRadius: pulse.interpolate({
+            inputRange: [0, 1],
+            outputRange: [14, 28],
+          }),
+          elevation: pulse.interpolate({
+            inputRange: [0, 1],
+            outputRange: [8, 22],
+          }),
+        },
+      ]}
       accessibilityLabel={`${label} ${formatAmount(current, unit)} of ${formatAmount(target, unit)}, ${a11yRemaining}`}
     >
       <View
@@ -66,6 +106,29 @@ export default function MacroCard({
           },
         ]}
       >
+        <Animated.View
+          pointerEvents="none"
+          style={[
+            styles.glowWash,
+            {
+              backgroundColor: color,
+              opacity: pulse.interpolate({
+                inputRange: [0, 1],
+                outputRange: [0, 0.28],
+              }),
+            },
+          ]}
+        />
+        <Animated.View
+          pointerEvents="none"
+          style={[
+            styles.glowRing,
+            {
+              borderColor: color,
+              opacity: pulse,
+            },
+          ]}
+        />
         <View
           pointerEvents="none"
           style={[styles.blob, { backgroundColor: color }]}
@@ -131,7 +194,7 @@ export default function MacroCard({
           />
         </View>
       </View>
-    </View>
+    </Animated.View>
   );
 }
 
@@ -150,6 +213,22 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     borderWidth: 1,
     minHeight: 168,
+  },
+  glowWash: {
+    position: "absolute",
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0,
+  },
+  glowRing: {
+    position: "absolute",
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0,
+    borderRadius: 20,
+    borderWidth: 2,
   },
   blob: {
     position: "absolute",
