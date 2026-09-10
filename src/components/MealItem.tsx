@@ -103,49 +103,51 @@ export default function MealItem({
                 <Text style={styles.time}>{formatLoggedAtTime(createdAt)}</Text>
               ) : null}
             </View>
-            <Text style={styles.macros}>
-              {calories} cal • {protein}g P • {carbs}g C • {fat}g F
+            <Text style={styles.macros} numberOfLines={1}>
+              {calories} cal · {protein}P · {carbs}C · {fat}F
             </Text>
           </View>
         </TouchableOpacity>
-        {onToggleFavorite ? (
-          <TouchableOpacity
-            onPress={onToggleFavorite}
-            hitSlop={8}
-            accessibilityRole="button"
-            accessibilityLabel={
-              isFavorite
-                ? `Remove ${name} from favorites`
-                : `Save ${name} as favorite`
-            }
-          >
-            <Ionicons
-              name={isFavorite ? "star" : "star-outline"}
-              size={20}
-              color={isFavorite ? colors.primary : colors.textSecondary}
-            />
-          </TouchableOpacity>
-        ) : null}
-        {onLogAgain ? (
-          <TouchableOpacity
-            onPress={onLogAgain}
-            hitSlop={8}
-            accessibilityRole="button"
-            accessibilityLabel={`Log ${name} again`}
-          >
-            <Ionicons name="copy-outline" size={20} color={colors.primary} />
-          </TouchableOpacity>
-        ) : null}
-        {onDelete ? (
-          <TouchableOpacity
-            onPress={confirmDelete}
-            hitSlop={8}
-            accessibilityRole="button"
-            accessibilityLabel={`Delete ${name}`}
-          >
-            <Ionicons name="trash-outline" size={20} color={colors.alert} />
-          </TouchableOpacity>
-        ) : null}
+        <View style={styles.actions}>
+          {onToggleFavorite ? (
+            <TouchableOpacity
+              onPress={onToggleFavorite}
+              hitSlop={8}
+              accessibilityRole="button"
+              accessibilityLabel={
+                isFavorite
+                  ? `Remove ${name} from favorites`
+                  : `Save ${name} as favorite`
+              }
+            >
+              <Ionicons
+                name={isFavorite ? "star" : "star-outline"}
+                size={20}
+                color={isFavorite ? colors.primary : colors.textSecondary}
+              />
+            </TouchableOpacity>
+          ) : null}
+          {onLogAgain ? (
+            <TouchableOpacity
+              onPress={onLogAgain}
+              hitSlop={8}
+              accessibilityRole="button"
+              accessibilityLabel={`Log ${name} again`}
+            >
+              <Ionicons name="copy-outline" size={20} color={colors.primary} />
+            </TouchableOpacity>
+          ) : null}
+          {onDelete ? (
+            <TouchableOpacity
+              onPress={confirmDelete}
+              hitSlop={8}
+              accessibilityRole="button"
+              accessibilityLabel={`Delete ${name}`}
+            >
+              <Ionicons name="trash-outline" size={20} color={colors.alert} />
+            </TouchableOpacity>
+          ) : null}
+        </View>
       </View>
     </View>
   );
@@ -164,7 +166,7 @@ const styles = StyleSheet.create({
     padding: 12,
     flexDirection: "row",
     alignItems: "center",
-    gap: 10,
+    gap: 8,
     borderWidth: 1,
     overflow: "hidden",
   },
@@ -213,5 +215,11 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: colors.textSecondary,
     marginTop: 4,
+  },
+  actions: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    flexShrink: 0,
   },
 });

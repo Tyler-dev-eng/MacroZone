@@ -290,8 +290,8 @@ function TimelineMealCard({
               {formatLoggedAtTime(meal.createdAt)}
             </Text>
             <Text style={styles.cardMacros} numberOfLines={1}>
-              {meal.calories} cal · {meal.protein}g P · {meal.carbs}g C ·{" "}
-              {meal.fat}g F
+              {meal.calories} cal · {meal.protein}P · {meal.carbs}C · {meal.fat}
+              F
             </Text>
           </View>
         </TouchableOpacity>
