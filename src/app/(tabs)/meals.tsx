@@ -1,5 +1,6 @@
 import KeyboardScrollView from "@/components/KeyboardScrollView";
 import MealItem from "@/components/MealItem";
+import MealsEmpty from "@/components/MealsEmpty";
 import MealsFilters from "@/components/MealsFilters";
 import {
   deleteAllMeals,
@@ -29,6 +30,7 @@ import { Alert, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 export default function MealsScreen() {
   const scrollRef = useResetScrollOnFocus();
   const [meals, setMeals] = useState<Meal[]>([]);
+  const [ready, setReady] = useState(false);
   const [favoriteKeys, setFavoriteKeys] = useState<Set<string>>(new Set());
   const [loggingId, setLoggingId] = useState<string | null>(null);
   const [query, setQuery] = useState("");
@@ -40,6 +42,7 @@ export default function MealsScreen() {
     const [data, saved] = await Promise.all([getMeals(), getSavedMeals()]);
     setMeals(data);
     setFavoriteKeys(new Set(saved.map(mealFingerprint)));
+    setReady(true);
   };
 
   const handleDeleteMeal = async (id: string) => {
@@ -134,11 +137,6 @@ export default function MealsScreen() {
     }, []),
   );
 
-  const emptyMessage =
-    meals.length === 0
-      ? "No meals logged yet."
-      : "No meals match these filters.";
-
   return (
     <KeyboardScrollView ref={scrollRef} style={globalStyles.container}>
       <View style={globalStyles.header}>
@@ -166,14 +164,27 @@ export default function MealsScreen() {
       ) : null}
 
       <View style={styles.list}>
-        {hasActiveFilters && meals.length > 0 ? (
+        {hasActiveFilters && meals.length > 0 && filteredMeals.length > 0 ? (
           <Text style={styles.count}>
             {filteredMeals.length}{" "}
             {filteredMeals.length === 1 ? "meal" : "meals"}
           </Text>
         ) : null}
-        {filteredMeals.length === 0 ? (
-          <Text style={globalStyles.empty}>{emptyMessage}</Text>
+        {!ready ? (
+          <Text style={globalStyles.empty}>Loading...</Text>
+        ) : filteredMeals.length === 0 ? (
+          meals.length === 0 ? (
+            <MealsEmpty kind="history" />
+          ) : (
+            <MealsEmpty
+              kind="filters"
+              query={query}
+              preset={preset}
+              from={from}
+              to={to}
+              onClear={clearFilters}
+            />
+          )
         ) : (
           filteredMeals.map((meal, index) => {
             const dayLabel = formatHistoryDay(meal.createdAt);
