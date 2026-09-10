@@ -6,27 +6,39 @@ Built with [Expo SDK 57](https://docs.expo.dev/versions/v57.0.0/), React Native,
 
 ## Screenshots
 
-### Empty states
+### Home
 
-| Home | Add meal | All meals |
-| --- | --- | --- |
-| ![Home empty](docs/screenshots/home_screen_empty.png) | ![Add meal empty](docs/screenshots/add_meal_empty.png) | ![All meals empty](docs/screenshots/all_meals_empty.png) |
-
-| Trends | Settings |
+| Macro progress & what fits | Today's meals & favorites |
 | --- | --- |
-| ![Trends empty](docs/screenshots/trends_empty.png) | ![Settings](docs/screenshots/settings.png) |
+| ![Home — close to targets](docs/screenshots/home_macros_close_only.png) | ![Home — today timeline](docs/screenshots/home_today_meals_only.png) |
 
-### With data
+| Empty state |
+| --- |
+| ![Home empty](docs/screenshots/home_screen_empty.png) |
 
-_Add these when you have meals logged — see [Screenshot checklist](#screenshot-checklist)._
+### Add meal
 
-| Home (in the zone) | Macro grid & timeline | Trends |
-| --- | --- | --- |
-| _coming soon_ | _coming soon_ | _coming soon_ |
-
-| Add meal | All meals |
+| Logged meal | Empty form |
 | --- | --- |
-| _coming soon_ | _coming soon_ |
+| ![Add meal — Power-Up Breakfast](docs/screenshots/breakfast_meal.png) | ![Add meal empty](docs/screenshots/add_meal_empty.png) |
+
+### All meals
+
+| Meal history | Empty state |
+| --- | --- |
+| ![All meals — history & filters](docs/screenshots/all_meals_list_only.png) | ![All meals empty](docs/screenshots/all_meals_empty.png) |
+
+### Trends
+
+| Day detail & meal mix | Empty state |
+| --- | --- |
+| ![Trends — fat chart & day summary](docs/screenshots/trends_fat_only.png) | ![Trends empty](docs/screenshots/trends_empty.png) |
+
+### Settings
+
+| Daily targets | Saved confirmation |
+| --- | --- |
+| ![Settings](docs/screenshots/settings.png) | ![Settings — targets saved](docs/screenshots/saved_dialog.png) |
 
 ## Features
 
@@ -112,7 +124,7 @@ macrozone/
 │   └── utils/               # Zone logic, trends, dates, meal types, etc.
 ├── drizzle/                 # Generated SQL migrations
 ├── assets/                  # App icon and images
-└── docs/screenshots/        # README screenshots (add your own)
+└── docs/screenshots/        # README screenshots
 ```
 
 Path alias: `@/*` → `./src/*`.
@@ -165,39 +177,32 @@ Meal photos are stored as local file URIs on device.
 
 ## Screenshot checklist
 
-Save PNGs in `docs/screenshots/`. Use a simulator or device (iPhone 15 Pro or similar), light mode, and include the tab bar.
+All screenshots live in `docs/screenshots/`.
 
-### Done
+### Captured
 
 | Filename | Screen |
 | --- | --- |
 | `home_screen_empty.png` | Home — Start your day card |
+| `home_macros_close_only.png` | Home — Close banner, macro grid, What fits |
+| `home_today_meals_only.png` | Home — Favorites, today timeline, meal detail |
 | `add_meal_empty.png` | Add Meal — blank form |
+| `breakfast_meal.png` | Add Meal — filled form with photo |
 | `all_meals_empty.png` | All Meals — no history |
+| `all_meals_list_only.png` | All Meals — search, filters, meal list |
 | `trends_empty.png` | Trends — no data |
+| `trends_fat_only.png` | Trends — charts, day summary, meal mix |
 | `settings.png` | Settings — daily targets |
+| `saved_dialog.png` | Settings — saved confirmation dialog |
 
-### Still to capture (with data)
-
-| Filename | What to capture | How to set it up |
-| --- | --- | --- |
-| `home_in_zone.png` | Green **In the zone** banner + macro grid | Log until all macros are ≥ 90% of target, none over. |
-| `home_with_meals.png` | Banner, macro cards, day timeline | Log 2–3 meals across meal types. |
-| `home_close.png` | Yellow **Close** banner | ~70%+ calories logged, not fully in zone. |
-| `home_what_fits.png` | **What fits** cue visible | Leave modest calorie/macro room. |
-| `add_meal_filled.png` | Form with name, macros, optional photo | Partially or fully filled form. |
-| `all_meals_history.png` | 3–4+ meals across 2+ days | Day headers and meal-type badges visible. |
-| `all_meals_filters.png` | Search or date filter active | Type a query or pick a date preset. |
-| `trends_7d.png` | 7-day charts with varied bars | Log on several past days (backdate if needed). |
-| `trends_day_detail.png` | Selected day summary card | Tap a day dot; show macro chips and meal mix. |
-| `meal_detail.png` | Meal edit screen | Tap a meal from All Meals. |
-
-### Optional
+### Optional extras
 
 | Filename | What to capture |
 | --- | --- |
-| `home_dark.png` | Home in system dark mode |
-| `device_frame.png` | Hero shot in a device bezel |
+| `home_in_zone.png` | Green **In the zone** banner (all macros ≥ 90%, none over) |
+| `all_meals_filters.png` | Search or date filter actively applied |
+| `meal_detail.png` | Meal edit screen from All Meals |
+| `device_frame.png` | Hero shot in a device bezel for the README header |
 
 ## License
 
