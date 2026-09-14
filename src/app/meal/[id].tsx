@@ -38,6 +38,7 @@ export default function MealDetailsScreen() {
 
   const [meal, setMeal] = useState<Meal | null>(null);
   const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
   const [calories, setCalories] = useState("");
   const [protein, setProtein] = useState("");
   const [carbs, setCarbs] = useState("");
@@ -56,6 +57,7 @@ export default function MealDetailsScreen() {
       if (row) {
         setMeal(row);
         setName(row.name);
+        setDescription(row.description ?? "");
         setCalories(String(row.calories));
         setProtein(String(row.protein));
         setCarbs(String(row.carbs));
@@ -89,6 +91,7 @@ export default function MealDetailsScreen() {
         protein: toNumber(protein) ?? 0,
         carbs: toNumber(carbs) ?? 0,
         fat: toNumber(fat) ?? 0,
+        description: description.trim() || null,
         imageUri,
         mealType,
         createdAt: loggedAt.toISOString(),
@@ -111,6 +114,7 @@ export default function MealDetailsScreen() {
         protein: toNumber(protein) ?? meal.protein,
         carbs: toNumber(carbs) ?? meal.carbs,
         fat: toNumber(fat) ?? meal.fat,
+        description: description.trim() || null,
         imageUri,
         mealType,
       });
@@ -186,6 +190,18 @@ export default function MealDetailsScreen() {
         placeholderTextColor={colors.textSecondary}
         value={name}
         onChangeText={setName}
+        accessibilityLabel="Meal name"
+      />
+
+      <TextInput
+        style={[styles.input, styles.descriptionInput]}
+        placeholder="Ingredients (optional)"
+        placeholderTextColor={colors.textSecondary}
+        value={description}
+        onChangeText={setDescription}
+        multiline
+        textAlignVertical="top"
+        accessibilityLabel="Ingredients"
       />
 
       <TextInput
@@ -265,6 +281,9 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     fontSize: 16,
     marginTop: 16,
+  },
+  descriptionInput: {
+    minHeight: 96,
   },
   row: {
     flexDirection: "row",

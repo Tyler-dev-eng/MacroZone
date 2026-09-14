@@ -51,14 +51,14 @@ export default function MealsFilters({
     <View style={styles.container}>
       <TextInput
         style={styles.search}
-        placeholder="Search meals"
+        placeholder="Search meals or ingredients"
         placeholderTextColor={colors.textSecondary}
         value={query}
         onChangeText={onQueryChange}
         autoCorrect={false}
         autoCapitalize="none"
         clearButtonMode="while-editing"
-        accessibilityLabel="Search meals"
+        accessibilityLabel="Search meals or ingredients"
       />
 
       <View style={styles.chips}>

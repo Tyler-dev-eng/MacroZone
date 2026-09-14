@@ -80,6 +80,7 @@ export const logMealAgain = async (id: string): Promise<Meal> => {
     protein: meal.protein,
     carbs: meal.carbs,
     fat: meal.fat,
+    description: meal.description,
     mealType: meal.mealType,
     imageUri: meal.imageUri,
     createdAt: new Date().toISOString(),

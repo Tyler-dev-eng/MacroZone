@@ -17,6 +17,7 @@ type MealItemProps = {
   protein: number;
   carbs: number;
   fat: number;
+  description?: string | null;
   imageUri?: string | null;
   mealType?: string | null;
   createdAt?: string | null;
@@ -33,6 +34,7 @@ export default function MealItem({
   protein,
   carbs,
   fat,
+  description,
   imageUri,
   mealType,
   createdAt,
@@ -97,6 +99,11 @@ export default function MealItem({
           )}
           <View style={styles.text}>
             <Text style={styles.name}>{name}</Text>
+            {description ? (
+              <Text style={styles.description} numberOfLines={2}>
+                {description}
+              </Text>
+            ) : null}
             <View style={styles.metaRow}>
               {mealType ? <MealTypeBadge type={mealType} /> : null}
               {createdAt ? (
@@ -198,6 +205,11 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "700",
     color: colors.text,
+  },
+  description: {
+    fontSize: 13,
+    color: colors.textSecondary,
+    marginTop: 4,
   },
   metaRow: {
     flexDirection: "row",

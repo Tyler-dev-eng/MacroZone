@@ -47,13 +47,14 @@ Built with [Expo SDK 57](https://docs.expo.dev/versions/v57.0.0/), React Native,
 - **Zone status banner** — At-a-glance feedback: empty, on track, close, in the zone, or over a target.
 - **Macro grid** — Calories, protein, carbs, and fat with progress toward your daily goals. Cards briefly glow when you log a meal.
 - **What fits cue** — Suggests foods that fit your remaining macros, prioritizing favorites and recent meals.
-- **Day timeline** — Today's meals grouped by type (breakfast, lunch, dinner, snack) with quick actions.
+- **Day timeline** — Today's meals grouped by type (breakfast, lunch, dinner, snack) with quick actions; ingredients shown when set.
 - **Favorites** — Save meals as templates and log them again with one tap.
 - **Log again** — Re-log past meals without re-entering macros.
 
 ### Meal logging
 
 - Name, calories, and optional protein / carbs / fat.
+- **Ingredients** — optional multiline notes (e.g. what's in the meal); saved with favorites and shown in meal lists.
 - **Meal type** picker with time-aware defaults (e.g. breakfast in the morning).
 - **Logged-at** date/time for backdating or correcting entries.
 - **Photo** attachment via camera or photo library.
@@ -63,7 +64,7 @@ Built with [Expo SDK 57](https://docs.expo.dev/versions/v57.0.0/), React Native,
 ### History & search
 
 - Browse all logged meals grouped by day.
-- Search by name or meal type.
+- Search by name, ingredients, or meal type.
 - Filter by date preset (today, yesterday, last 7 days, last 30 days, custom range).
 - Tap a meal to view or edit details.
 - Delete individual meals or clear all history.
@@ -169,9 +170,9 @@ Migrations run automatically on app launch via `useMigrations` in `src/app/_layo
 
 | Table | Purpose |
 | --- | --- |
-| `meals` | Daily food log (name, macros, meal type, optional photo URI, logged-at timestamp) |
+| `meals` | Daily food log (name, macros, optional ingredients, meal type, optional photo URI, logged-at timestamp) |
 | `targets` | Singleton row for daily macro goals |
-| `saved_meals` | Favorite meal templates (independent of the daily log) |
+| `saved_meals` | Favorite meal templates (independent of the daily log; includes optional ingredients) |
 
 Meal photos are stored as local file URIs on device.
 

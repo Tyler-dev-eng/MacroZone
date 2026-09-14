@@ -10,6 +10,8 @@ export const meals = sqliteTable("meals", {
   protein: real("protein").notNull(),
   carbs: real("carbs").notNull(),
   fat: real("fat").notNull(),
+  // Optional ingredients or notes.
+  description: text("description"),
   // Local file URI for the optional meal photo.
   imageUri: text("image_uri"),
   // breakfast | lunch | dinner | snack
@@ -43,6 +45,7 @@ export const savedMeals = sqliteTable("saved_meals", {
   protein: real("protein").notNull(),
   carbs: real("carbs").notNull(),
   fat: real("fat").notNull(),
+  description: text("description"),
   imageUri: text("image_uri"),
   mealType: text("meal_type").notNull(),
   createdAt: text("created_at").notNull(),

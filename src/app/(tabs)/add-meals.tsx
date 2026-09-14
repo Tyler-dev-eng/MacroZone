@@ -40,6 +40,7 @@ export default function AddMealScreen() {
   const params = useLocalSearchParams<{ type?: string | string[] }>();
   const typeParam = Array.isArray(params.type) ? params.type[0] : params.type;
   const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
   const [calories, setCalories] = useState("");
   const [protein, setProtein] = useState("");
   const [carbs, setCarbs] = useState("");
@@ -68,6 +69,7 @@ export default function AddMealScreen() {
 
   const applySavedMeal = (saved: SavedMeal) => {
     setName(saved.name);
+    setDescription(saved.description ?? "");
     setCalories(String(saved.calories));
     setProtein(String(saved.protein));
     setCarbs(String(saved.carbs));
@@ -111,6 +113,7 @@ export default function AddMealScreen() {
         protein: toNumber(protein) ?? 0,
         carbs: toNumber(carbs) ?? 0,
         fat: toNumber(fat) ?? 0,
+        description: description.trim() || null,
         imageUri,
         mealType,
         createdAt: loggedAt.toISOString(),
@@ -127,6 +130,7 @@ export default function AddMealScreen() {
 
     // Tabs stay mounted, so clear the form for the next visit.
     setName("");
+    setDescription("");
     setCalories("");
     setProtein("");
     setCarbs("");
@@ -167,6 +171,18 @@ export default function AddMealScreen() {
         placeholderTextColor={colors.textSecondary}
         value={name}
         onChangeText={setName}
+        accessibilityLabel="Meal name"
+      />
+
+      <TextInput
+        style={[styles.input, styles.descriptionInput]}
+        placeholder="Ingredients (optional)"
+        placeholderTextColor={colors.textSecondary}
+        value={description}
+        onChangeText={setDescription}
+        multiline
+        textAlignVertical="top"
+        accessibilityLabel="Ingredients"
       />
 
       <TextInput
@@ -244,6 +260,9 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     fontSize: 16,
     marginTop: 16,
+  },
+  descriptionInput: {
+    minHeight: 96,
   },
   row: {
     flexDirection: "row",

@@ -126,7 +126,7 @@ export default function MealsScreen() {
     return meals.filter((meal) => {
       if (needle) {
         const haystack =
-          `${meal.name} ${mealTypeLabel(meal.mealType)}`.toLowerCase();
+          `${meal.name} ${meal.description ?? ""} ${mealTypeLabel(meal.mealType)}`.toLowerCase();
         if (!haystack.includes(needle)) return false;
       }
       return matchesDatePreset(meal.createdAt, preset, from, to);
@@ -211,6 +211,7 @@ export default function MealsScreen() {
                   protein={meal.protein}
                   carbs={meal.carbs}
                   fat={meal.fat}
+                  description={meal.description}
                   imageUri={meal.imageUri}
                   mealType={meal.mealType}
                   createdAt={meal.createdAt}

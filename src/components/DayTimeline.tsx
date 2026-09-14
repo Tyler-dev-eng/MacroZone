@@ -262,7 +262,7 @@ function TimelineMealCard({
           style={styles.cardBody}
           onPress={onPress}
           accessibilityRole="button"
-          accessibilityLabel={`${meal.name}, ${meal.calories} calories`}
+          accessibilityLabel={`${meal.name}, ${meal.calories} calories${meal.description ? `, ${meal.description}` : ""}`}
         >
           {meal.imageUri ? (
             <Image
@@ -286,6 +286,11 @@ function TimelineMealCard({
             <Text style={styles.cardName} numberOfLines={1}>
               {meal.name}
             </Text>
+            {meal.description ? (
+              <Text style={styles.cardDescription} numberOfLines={2}>
+                {meal.description}
+              </Text>
+            ) : null}
             <Text style={styles.cardMeta}>
               {formatLoggedAtTime(meal.createdAt)}
             </Text>
@@ -472,6 +477,11 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "700",
     color: colors.text,
+  },
+  cardDescription: {
+    marginTop: 4,
+    fontSize: 13,
+    color: colors.textSecondary,
   },
   cardMeta: {
     marginTop: 2,

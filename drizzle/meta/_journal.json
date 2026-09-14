@@ -36,6 +36,13 @@
       "when": 1788899331754,
       "tag": "0004_jazzy_scourge",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1789369005785,
+      "tag": "0005_fast_lady_bullseye",
+      "breakpoints": true
     }
   ]
 }

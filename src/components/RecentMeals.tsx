@@ -36,6 +36,7 @@ export default function RecentMeals({
             protein={meal.protein}
             carbs={meal.carbs}
             fat={meal.fat}
+            description={meal.description}
             imageUri={meal.imageUri}
             mealType={meal.mealType}
             createdAt={meal.createdAt}
